@@ -1,0 +1,5 @@
+{
+  "name": "Swiss System Chess Tournament",
+  "description": "An application to manage a chess tournament using the Swiss pairing system. Users can input player names and ELOs, set the number of rounds, record match results, and view a live leaderboard.",
+  "requestFramePermissions": []
+}
