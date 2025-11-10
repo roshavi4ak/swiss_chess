@@ -1,10 +1,12 @@
 import React from 'react';
 import { Pairing, Result } from '../types';
 import { PrintIcon } from './Icon';
+import { useI18n } from '../i18n/I18nContext';
 
 interface PairingsProps {
   pairings: Pairing[];
   onResultUpdate: (table: number, result: Result) => void;
+  onColorFlip: (table: number) => void;
   isOrganizer: boolean;
   swapSelection: { playerId: number; table: number } | null;
   onPlayerSelectForSwap: (playerId: number, table: number) => void;
@@ -26,12 +28,14 @@ const ResultButton: React.FC<{
   );
 };
 
-const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, isOrganizer, swapSelection, onPlayerSelectForSwap, onPrint }) => {
+const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFlip, isOrganizer, swapSelection, onPlayerSelectForSwap, onPrint }) => {
+  const { t } = useI18n();
+
   return (
     <div className="bg-gray-800 p-6 rounded-xl shadow-lg h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-yellow-400">Current Round Pairings</h2>
-        {pairings.length > 0 && (
+        <h2 className="text-2xl font-bold text-yellow-400">{t.currentRoundPairings}</h2>
+        {pairings.length > 0 && isOrganizer && (
           <button
             onClick={onPrint}
             className="no-print bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg transition duration-300 flex items-center gap-2 text-sm"
@@ -50,7 +54,12 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, isOrganiz
            const isBlackSelected = isOrganizer && pairing.black && swapSelection?.playerId === pairing.black.id;
 
           return (
-            <div key={pairing.table} className="bg-gray-700 p-4 rounded-lg">
+            <div key={pairing.table} className="bg-gray-700 p-4 rounded-lg print-pairing-card">
+              {/* Table Number Header */}
+              <div className="print-table-header font-bold text-lg mb-3 pb-2 border-b border-gray-600">
+                {t.table} {pairing.table}
+              </div>
+              
               {pairing.black ? (
                 <>
                   <div className="flex justify-between items-center">
@@ -78,13 +87,49 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, isOrganiz
                       <span className="font-semibold text-white">{pairing.black.name}</span>
                     </div>
                   </div>
-                  {isOrganizer && (
-                    <div className="flex justify-center items-center gap-2 mt-3 pt-3 border-t border-gray-600 no-print">
+                  {/* Results section - shown for both organizers and observers */}
+                  <div className="mt-3 pt-3 border-t border-gray-600 no-print">
+                    {isOrganizer ? (
+                      <div className="flex justify-center items-center gap-2">
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '1-0')} selected={pairing.result === '1-0'}>1-0</ResultButton>
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '1/2-1/2')} selected={pairing.result === '1/2-1/2'}>½-½</ResultButton>
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '0-1')} selected={pairing.result === '0-1'}>0-1</ResultButton>
-                    </div>
-                  )}
+                        <button
+                          onClick={() => onColorFlip(pairing.table)}
+                          className="py-2 px-3 rounded-md text-xs font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all duration-200"
+                          title="Flip colors"
+                          aria-label="Flip player colors"
+                        >
+                          Flip
+                        </button>
+                      </div>
+                    ) : (
+                      /* Observer view - show results in read-only format */
+                      <div className="flex justify-center items-center gap-2">
+                        <div className={`py-2 px-3 rounded-md text-xs font-semibold ${
+                          pairing.result === '1-0'
+                            ? 'bg-yellow-500 text-gray-900'
+                            : 'bg-gray-600 text-gray-300'
+                        }`}>
+                          1-0
+                        </div>
+                        <div className={`py-2 px-3 rounded-md text-xs font-semibold ${
+                          pairing.result === '1/2-1/2'
+                            ? 'bg-yellow-500 text-gray-900'
+                            : 'bg-gray-600 text-gray-300'
+                        }`}>
+                          ½-½
+                        </div>
+                        <div className={`py-2 px-3 rounded-md text-xs font-semibold ${
+                          pairing.result === '0-1'
+                            ? 'bg-yellow-500 text-gray-900'
+                            : 'bg-gray-600 text-gray-300'
+                        }`}>
+                          0-1
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <div className="flex justify-between items-center">

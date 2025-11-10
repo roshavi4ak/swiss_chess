@@ -17,40 +17,63 @@
 </script>
 <style>
   @media print {
-    body.printing * {
-      visibility: hidden;
+    body {
+      margin: 0;
+      padding: 20px;
+      background: white !important;
+      color: black !important;
+      font-family: Arial, sans-serif;
     }
-    .printable-section, .printable-section * {
-      visibility: visible;
-    }
-    .printable-section {
-      position: absolute;
-      left: 20px;
-      top: 20px;
-      right: 20px;
-      width: auto;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    body.printing {
-        background-color: #fff !important;
-    }
-    .printable-section h2, .printable-section th, .printable-section td, .printable-section span, .printable-section div {
-        color: #000 !important;
-    }
-    .printable-section .bg-gray-800, 
-    .printable-section .bg-gray-700,
-    .printable-section tr.hover\\:bg-gray-700\\/50:hover {
-        background-color: #fff !important;
-    }
-    .printable-section .border-gray-600, .printable-section .border-gray-700 {
-        border-color: #ddd !important;
-    }
-    .printable-section .font-mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
+    
     .no-print {
-        display: none !important;
+      display: none !important;
+    }
+    
+    .printable-section {
+      display: block !important;
+      visibility: visible !important;
+      position: static !important;
+      background: white !important;
+      color: black !important;
+      box-shadow: none !important;
+      border: 1px solid #ddd !important;
+      margin: 0 !important;
+      padding: 20px !important;
+    }
+    
+    .printable-section * {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .printable-section h2 {
+      color: #000 !important;
+      border-bottom: 2px solid #000 !important;
+      padding-bottom: 10px !important;
+      margin-bottom: 20px !important;
+    }
+    
+    .printable-section .bg-gray-800,
+    .printable-section .bg-gray-700 {
+      background: white !important;
+      border: 1px solid #ddd !important;
+    }
+    
+    .printable-section .text-yellow-400,
+    .printable-section .text-white {
+      color: #000 !important;
+    }
+    
+    .printable-section .border-gray-600 {
+      border-color: #ddd !important;
+    }
+    
+    .print-only-header {
+      display: block !important;
+      text-align: center !important;
+      margin-bottom: 20px !important;
+      font-size: 24px !important;
+      font-weight: bold !important;
     }
   }
 </style>

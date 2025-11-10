@@ -8,6 +8,8 @@ import { ChessKingIcon } from './components/Icon';
 import ShareControl from './components/ShareControl';
 import History from './components/History';
 import SwapConfirmationDialog from './components/SwapConfirmationDialog';
+import LanguageSwitcher from './i18n/LanguageSwitcher';
+import { useI18n } from './i18n/I18nContext';
 
 
 // This interface will be used for the data passed to the Leaderboard component.
@@ -24,6 +26,7 @@ type PendingSwap = {
 
 
 const App: React.FC = () => {
+  const { t } = useI18n();
   const [status, setStatus] = useState<TournamentStatus>('SETUP');
   const [players, setPlayers] = useState<Player[]>([]);
   const [pairingsHistory, setPairingsHistory] = useState<Pairing[][]>([]);
@@ -112,7 +115,7 @@ const App: React.FC = () => {
   };
   
   const handleNewTournament = () => {
-    if (window.confirm("Are you sure? This will delete the current tournament data and start a new one.")) {
+    if (window.confirm(t.areYouSureDelete)) {
       // Clear the tournament state from local storage.
       localStorage.removeItem('swissTournamentState');
       
@@ -247,6 +250,34 @@ const App: React.FC = () => {
     setPendingSwap(null);
   };
 
+  const handleColorFlip = (table: number) => {
+    if (role !== 'ORGANIZER' || isObserving || status !== 'IN_PROGRESS') return;
+
+    const newPairingsHistory = pairingsHistory.map((roundPairings, index) => {
+      // If it's not the current round, return the original array
+      if (index !== currentRound - 1) {
+        return roundPairings;
+      }
+      
+      // For the current round, create a new array of pairings
+      return roundPairings.map(pairing => {
+        if (pairing.table === table && pairing.black) {
+          // If this is the pairing to flip, swap white and black players
+          return {
+            ...pairing,
+            white: pairing.black,
+            black: pairing.white,
+            result: null // Reset result when colors are flipped
+          };
+        }
+        // Otherwise, return the original pairing object
+        return pairing;
+      });
+    });
+    
+    setPairingsHistory(newPairingsHistory);
+  };
+
   const handleNextRound = () => {
     const lastRoundPairings = pairingsHistory[currentRound - 1];
     const playerMap = new Map<number, Player>(players.map(p => [p.id, { ...p, opponents: [...p.opponents], colorHistory: [...p.colorHistory] }]));
@@ -362,19 +393,356 @@ const App: React.FC = () => {
 
   const handlePrint = (sectionId: string) => {
     const printSection = document.getElementById(sectionId);
-    if (!printSection) return;
+    if (!printSection) {
+      console.error(`Print section with id "${sectionId}" not found`);
+      alert('Print section not found. Please try again.');
+      return;
+    }
 
-    const handleAfterPrint = () => {
-      document.body.classList.remove('printing');
-      printSection.classList.remove('printable-section');
-      window.removeEventListener('afterprint', handleAfterPrint);
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Unable to open print window. Please allow pop-ups and try again.');
+      return;
+    }
+
+    // Generate print-friendly content
+    const printContent = printSection.cloneNode(true) as HTMLElement;
+    
+    // Remove no-print elements from the clone
+    const noPrintElements = printContent.querySelectorAll('.no-print');
+    noPrintElements.forEach(element => element.remove());
+    
+    // Remove the h2 header from the cloned content to avoid duplication
+    const clonedHeader = printContent.querySelector('h2');
+    if (clonedHeader) {
+      clonedHeader.remove();
+    }
+    
+    // Remove the organizer instruction text
+    const organizerInstruction = printContent.querySelector('p');
+    if (organizerInstruction && organizerInstruction.textContent?.includes('organizer')) {
+      organizerInstruction.remove();
+    }
+    
+    // Add print styles
+    const printStyles = `
+      <style>
+        * {
+          box-sizing: border-box;
+        }
+        
+        body {
+          margin: 0;
+          padding: 15px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: white;
+          color: #333;
+          line-height: 1.4;
+        }
+        
+        h1 {
+          text-align: center;
+          color: #2c3e50;
+          font-size: 24px;
+          margin-bottom: 20px;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 10px;
+        }
+        
+        h2 {
+          color: #2c3e50;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 8px;
+          margin-bottom: 20px;
+          font-size: 18px;
+        }
+        
+        .printable-content {
+          background: white;
+          border: 1px solid #bdc3c7;
+          border-radius: 4px;
+          padding: 20px;
+          margin-bottom: 15px;
+        }
+        
+        /* Table styling for leaderboard */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+          font-size: 12px;
+        }
+        
+        th {
+          background: #34495e;
+          color: white;
+          font-weight: bold;
+          padding: 8px 6px;
+          text-align: left;
+          border: 1px solid #2c3e50;
+        }
+        
+        td {
+          padding: 6px;
+          border: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #f8f9fa;
+        }
+        
+        /* Pairings styling - more compact */
+        .print-pairing-card {
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 12px;
+          margin-bottom: 10px;
+          page-break-inside: avoid;
+        }
+        
+        .print-table-header {
+          font-size: 14px;
+          font-weight: bold;
+          color: #2c3e50;
+          margin-bottom: 6px;
+          padding-bottom: 3px;
+          border-bottom: 1px solid #bdc3c7;
+        }
+        
+        /* Force horizontal layout for player vs player */
+        .flex.justify-between.items-center {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: center !important;
+          flex-wrap: nowrap !important;
+          margin-bottom: 6px !important;
+        }
+        
+        .flex-1 {
+          flex: 1 !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+        
+        .text-left {
+          text-align: left !important;
+        }
+        
+        .text-right {
+          text-align: right !important;
+        }
+        
+        .player-name {
+          font-weight: bold;
+          font-size: 12px;
+          color: #2c3e50;
+        }
+        
+        .player-elo {
+          color: #7f8c8d;
+          font-size: 10px;
+          margin-left: 3px;
+        }
+        
+        .vs {
+          text-align: center;
+          font-weight: bold;
+          color: #e74c3c;
+          font-size: 11px;
+          margin: 0 8px;
+          background: #fdf2f2;
+          padding: 2px 6px;
+          border-radius: 8px;
+          border: 1px solid #e74c3c;
+          white-space: nowrap;
+        }
+        
+        .bye {
+          text-align: center;
+          background: #d4edda;
+          color: #155724;
+          padding: 6px;
+          border-radius: 4px;
+          font-weight: bold;
+          font-size: 12px;
+        }
+        
+        /* Results buttons styling */
+        .results-section {
+          border-top: 1px solid #ddd;
+          padding-top: 6px;
+          margin-top: 6px;
+        }
+        
+        .result-button {
+          display: inline-block;
+          padding: 3px 6px;
+          margin: 1px;
+          border: 1px solid #bbb;
+          background: #f8f9fa;
+          color: #333;
+          text-decoration: none;
+          border-radius: 2px;
+          font-size: 9px;
+          font-weight: bold;
+          white-space: nowrap;
+        }
+        
+        .result-button.selected {
+          background: #ffd700;
+          color: #333;
+          border-color: #ffb300;
+        }
+        
+        .flip-button {
+          display: inline-block;
+          padding: 3px 6px;
+          margin: 1px;
+          background: #ff9800;
+          color: white;
+          border: 1px solid #f57c00;
+          border-radius: 2px;
+          font-size: 9px;
+          font-weight: bold;
+          white-space: nowrap;
+        }
+        
+        /* Make everything more compact for print */
+        .space-y-4 > * + * {
+          margin-top: 8px;
+        }
+        
+        .bg-gray-700 {
+          background: white !important;
+          border: 1px solid #ddd;
+        }
+        
+        .bg-gray-800 {
+          background: white !important;
+          border: 1px solid #bdc3c7;
+        }
+        
+        .text-yellow-400 {
+          color: #2c3e50 !important;
+        }
+        
+        .text-white {
+          color: #333 !important;
+        }
+        
+        /* Force elements to stay on same line */
+        .rounded-lg {
+          border-radius: 3px !important;
+        }
+        
+        .p-2, .p-4 {
+          padding: 4px !important;
+        }
+        
+        .mx-4 {
+          margin-left: 6px !important;
+          margin-right: 6px !important;
+        }
+        
+        .w-12 {
+          width: 60px !important;
+        }
+        
+        .font-semibold {
+          font-weight: 600 !important;
+        }
+        
+        .text-sm {
+          font-size: 10px !important;
+        }
+        
+        .text-xs {
+          font-size: 9px !important;
+        }
+        
+        /* Print optimizations */
+        @media print {
+          body {
+            margin: 0;
+            padding: 8px;
+          }
+          
+          .printable-content {
+            border: 1px solid #333;
+            box-shadow: none;
+          }
+          
+          .print-pairing-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 8px;
+            padding: 8px;
+          }
+          
+          table {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          
+          h1, h2 {
+            color: #000 !important;
+            border-color: #000 !important;
+          }
+          
+          /* Force the specific layout to work */
+          .flex {
+            display: flex !important;
+          }
+          
+          .justify-between {
+            justify-content: space-between !important;
+          }
+          
+          .items-center {
+            align-items: center !important;
+          }
+          
+          .flex-1 {
+            flex: 1 !important;
+          }
+        }
+      </style>
+    `;
+
+    // Generate title and round info for pairings
+    const getPrintTitle = () => {
+      if (sectionId === 'pairings-section') {
+        return `${t.currentRoundPairings} (${t.round} ${currentRound} ${t.outOf} ${totalRounds})`;
+      }
+      return t.leaderboard;
     };
 
-    window.addEventListener('afterprint', handleAfterPrint);
+    // Write content to new window
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Swiss Chess Tournament - ${sectionId === 'pairings-section' ? 'Pairings' : 'Leaderboard'}</title>
+          ${printStyles}
+        </head>
+        <body>
+          <h2>${getPrintTitle()}</h2>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
     
-    printSection.classList.add('printable-section');
-    document.body.classList.add('printing');
-    window.print();
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    };
   };
 
   if (status === 'SETUP') {
@@ -391,20 +759,27 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-8 no-print">
-            <div className="inline-flex justify-center items-center gap-4 relative">
-                <ChessKingIcon className="w-10 h-10 text-yellow-400"/>
-                <h1 className="text-4xl font-bold">Swiss Tournament</h1>
-                <p className="absolute -bottom-5 text-lg text-yellow-300 font-semibold">
-                    {status === 'COMPLETED' ? 'Tournament Completed' : `Round ${currentRound} / ${totalRounds}`}
-                </p>
+            <div className="flex justify-between items-start">
+                <div className="flex-1"></div>
+                <div className="inline-flex justify-center items-center gap-4 relative">
+                    <ChessKingIcon className="w-10 h-10 text-yellow-400"/>
+                    <h1 className="text-4xl font-bold">{t.swissTournament}</h1>
+                    <p className="absolute -bottom-5 text-lg text-yellow-300 font-semibold">
+                        {status === 'COMPLETED' ? t.tournamentCompleted : `${t.round} ${currentRound} / ${totalRounds}`}
+                    </p>
+                </div>
+                <div className="flex-1 flex justify-end">
+                    <LanguageSwitcher className="mt-4" />
+                </div>
             </div>
         </header>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div id="pairings-section" className="lg:col-span-2">
-            <Pairings 
+            <Pairings
               pairings={currentPairings}
               onResultUpdate={handleResultUpdate}
+              onColorFlip={handleColorFlip}
               isOrganizer={isOrganizerView}
               swapSelection={swapSelection}
               onPlayerSelectForSwap={handlePlayerSelectForSwap}
@@ -412,7 +787,7 @@ const App: React.FC = () => {
             />
           </div>
           <div id="leaderboard-section" className="lg:col-span-1">
-            <Leaderboard players={livePlayers} onPrint={() => handlePrint('leaderboard-section')} />
+            <Leaderboard players={livePlayers} onPrint={() => handlePrint('leaderboard-section')} isOrganizer={isOrganizerView} />
           </div>
         </div>
 
@@ -423,32 +798,32 @@ const App: React.FC = () => {
               disabled={!allResultsSubmitted}
               className="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed enabled:hover:bg-green-700 enabled:transform enabled:hover:scale-105"
             >
-              {`Start Next Round (${currentRound + 1})`}
+              {t.startNextRound} ({currentRound + 1})
             </button>
           )}
           {status === 'COMPLETED' && (
-            <p className="text-2xl font-bold text-green-400">🏆 Tournament Finished! 🏆</p>
+            <p className="text-2xl font-bold text-green-400">{t.tournamentFinished}</p>
           )}
           {isOrganizerView && (
             <button
               onClick={handleManualSave}
               className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
             >
-              {saveStatus === 'SAVED' ? '✓ Saved!' : 'Save Tournament'}
+              {saveStatus === 'SAVED' ? t.saved : t.saveTournament}
             </button>
           )}
           <button
             onClick={() => setView('HISTORY')}
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
           >
-            View History
+            {t.viewHistory}
           </button>
            {role === 'ORGANIZER' && (
             <button
                 onClick={() => setIsObserving(!isObserving)}
                 className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
             >
-                {isObserving ? 'Return to Organizer View' : 'Observer View'}
+                {isObserving ? t.returnToOrganizerView : t.observerView}
             </button>
            )}
         </div>
@@ -464,7 +839,7 @@ const App: React.FC = () => {
                         onClick={handleNewTournament}
                         className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
                     >
-                        New Tournament
+                        {t.newTournament}
                     </button>
                 </div>
             </>

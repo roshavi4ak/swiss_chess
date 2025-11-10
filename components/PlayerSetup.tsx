@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Player } from '../types';
 import { ChessKingIcon } from './Icon';
+import { useI18n } from '../i18n/I18nContext';
 
 interface PlayerSetupProps {
   onStart: (players: Player[], rounds: number) => void;
@@ -24,8 +25,9 @@ const calculateRecommendedRounds = (playerCount: number): number => {
     return Math.max(3, recommended); // Ensure at least 3 rounds
 };
 
-
 const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
+  const { t } = useI18n();
+  
   const [players, setPlayers] = useState(defaultPlayers);
   const [rounds, setRounds] = useState(() => calculateRecommendedRounds(defaultPlayers.length));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -66,10 +68,10 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
     const newErrors: Record<string, string> = {};
     players.forEach((player, index) => {
         if (!player.name.trim()) {
-            newErrors[`name-${index}`] = 'Player name cannot be empty.';
+            newErrors[`name-${index}`] = t.nameError;
         }
         if (isNaN(player.elo) || player.elo < 100 || player.elo > 3000) {
-            newErrors[`elo-${index}`] = 'ELO must be between 100 and 3000.';
+            newErrors[`elo-${index}`] = t.eloError;
         }
     });
 
@@ -104,8 +106,8 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
       <div className="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
         <div className="text-center mb-8">
           <ChessKingIcon className="w-16 h-16 mx-auto text-yellow-400" />
-          <h1 className="text-4xl font-bold mt-2">Swiss Tournament Setup</h1>
-          <p className="text-gray-400 mt-2">Enter player details and configure the tournament.</p>
+          <h1 className="text-4xl font-bold mt-2">{t.swissTournamentSetup}</h1>
+          <p className="text-gray-400 mt-2">{t.enterPlayerDetails}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">

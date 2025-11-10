@@ -2,14 +2,17 @@ import React from 'react';
 import { Player } from '../types';
 import { LeaderboardPlayer } from '../App';
 import { PrintIcon } from './Icon';
-
+import { useI18n } from '../i18n/I18nContext';
 
 interface LeaderboardProps {
   players: LeaderboardPlayer[];
   onPrint: () => void;
+  isOrganizer: boolean;
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint }) => {
+const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer }) => {
+  const { t } = useI18n();
+  
   const sortedPlayers = [...players].sort((a, b) => {
     if (b.score !== a.score) {
       return b.score - a.score;
@@ -20,8 +23,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint }) => {
   return (
     <div className="bg-gray-800 p-6 rounded-xl shadow-lg h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-yellow-400">Leaderboard</h2>
-        {players.length > 0 && (
+        <h2 className="text-2xl font-bold text-yellow-400">{t.leaderboard}</h2>
+        {players.length > 0 && isOrganizer && (
           <button
             onClick={onPrint}
             className="no-print bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg transition duration-300 flex items-center gap-2 text-sm"
@@ -37,11 +40,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint }) => {
         <table className="w-full text-left">
           <thead className="border-b border-gray-600">
             <tr>
-              <th className="p-3">Rank</th>
-              <th className="p-3">Player</th>
-              <th className="p-3 text-center">Colors</th>
-              <th className="p-3 text-right">Score</th>
-              <th className="p-3 text-right">ELO</th>
+              <th className="p-3">{t.rank}</th>
+              <th className="p-3">{t.player}</th>
+              <th className="p-3 text-center">{t.colorHistory}</th>
+              <th className="p-3 text-right">{t.score}</th>
+              <th className="p-3 text-right">{t.elo}</th>
             </tr>
           </thead>
           <tbody>
