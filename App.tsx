@@ -39,8 +39,16 @@ const App: React.FC = () => {
   const [isObserving, setIsObserving] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'IDLE' | 'SAVED'>('IDLE');
   const [pendingSwap, setPendingSwap] = useState<PendingSwap | null>(null);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState<string>('');
 
 
+  // Extract tournament ID from URL path
+  const getTournamentId = () => {
+    const path = window.location.pathname;
+    const match = path.match(/\/(\d+)/);
+    return match ? match[1] : null;
+  };
   // Logic to save state, extracted to be reusable
   const saveStateToLocalStorage = useCallback(() => {
     if (status !== 'SETUP') {
@@ -52,7 +60,10 @@ const App: React.FC = () => {
         totalRounds,
         organizerKey,
       };
-      localStorage.setItem('swissTournamentState', JSON.stringify(stateToSave));
+      const tournamentId = getTournamentId();
+      if (tournamentId) {
+        localStorage.setItem(`swissTournamentState-${tournamentId}`, JSON.stringify(stateToSave));
+      }
       return true;
     }
     return false;
@@ -61,28 +72,58 @@ const App: React.FC = () => {
   // Load state from localStorage on initial component mount
   useEffect(() => {
     try {
-      const savedStateJSON = localStorage.getItem('swissTournamentState');
-      if (savedStateJSON) {
-        const savedState = JSON.parse(savedStateJSON);
-        if (savedState && savedState.status !== 'SETUP') {
-          const hash = window.location.hash;
-          if (savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`) {
-            setRole('ORGANIZER');
-          } else {
-            setRole('OBSERVER');
-          }
+      const tournamentId = getTournamentId();
+      const hash = window.location.hash;
 
-          setPlayers(savedState.players);
-          setPairingsHistory(savedState.pairingsHistory);
-          setCurrentRound(savedState.currentRound);
-          setTotalRounds(savedState.totalRounds);
-          setOrganizerKey(savedState.organizerKey);
-          setStatus(savedState.status);
+      if (tournamentId) {
+        // Load tournament-specific state
+        const savedStateJSON = localStorage.getItem(`swissTournamentState-${tournamentId}`);
+        if (savedStateJSON) {
+          const savedState = JSON.parse(savedStateJSON);
+          if (savedState && savedState.status !== 'SETUP') {
+            if (savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`) {
+              setRole('ORGANIZER');
+            } else {
+              setRole('OBSERVER');
+            }
+
+            setPlayers(savedState.players);
+            setPairingsHistory(savedState.pairingsHistory);
+            setCurrentRound(savedState.currentRound);
+            setTotalRounds(savedState.totalRounds);
+            setOrganizerKey(savedState.organizerKey);
+            setStatus(savedState.status);
+          }
+        }
+      } else {
+        // Fallback to old single tournament logic for backward compatibility
+        const savedStateJSON = localStorage.getItem('swissTournamentState');
+        if (savedStateJSON) {
+          const savedState = JSON.parse(savedStateJSON);
+          if (savedState && savedState.status !== 'SETUP') {
+            if (savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`) {
+              setRole('ORGANIZER');
+            } else {
+              setRole('OBSERVER');
+            }
+
+            setPlayers(savedState.players);
+            setPairingsHistory(savedState.pairingsHistory);
+            setCurrentRound(savedState.currentRound);
+            setTotalRounds(savedState.totalRounds);
+            setOrganizerKey(savedState.organizerKey);
+            setStatus(savedState.status);
+          }
         }
       }
     } catch (error) {
       console.error("Failed to load tournament state from localStorage", error);
-      localStorage.removeItem('swissTournamentState');
+      const tournamentId = getTournamentId();
+      if (tournamentId) {
+        localStorage.removeItem(`swissTournamentState-${tournamentId}`);
+      } else {
+        localStorage.removeItem('swissTournamentState');
+      }
     }
   }, []);
 
@@ -90,6 +131,45 @@ const App: React.FC = () => {
   useEffect(() => {
     saveStateToLocalStorage();
   }, [saveStateToLocalStorage]);
+
+  // Separate effect for password protection that runs on mount
+  useEffect(() => {
+    const checkPasswordProtection = () => {
+      const tournamentId = getTournamentId();
+      const isAuthenticated = sessionStorage.getItem('authenticated') === 'true';
+      const hash = window.location.hash;
+
+      console.log('Password check:', { tournamentId, isAuthenticated, hash });
+
+      if (!tournamentId) {
+        // Root URL requires authentication
+        if (!isAuthenticated) {
+          setShowPasswordPrompt(true);
+        }
+      } else {
+        // Tournament URLs with organizer hash require authentication
+        if (hash === '#organizer-roshavi4ak' && !isAuthenticated) {
+          setShowPasswordPrompt(true);
+        }
+      }
+    };
+
+    checkPasswordProtection();
+  }, []);
+
+  // Auto-refresh for observer pages every 10 seconds
+  useEffect(() => {
+    const tournamentId = getTournamentId();
+    
+    // Only refresh observer pages (not root URL, not organizer pages)
+    if (tournamentId && role === 'OBSERVER') {
+      const refreshInterval = setInterval(() => {
+        window.location.reload();
+      }, 10000); // 10 seconds
+
+      return () => clearInterval(refreshInterval);
+    }
+  }, [role]);
 
   const handleManualSave = () => {
     if (saveStateToLocalStorage()) {
@@ -99,26 +179,43 @@ const App: React.FC = () => {
   };
 
   const handleStartTournament = (initialPlayers: Player[], rounds: number) => {
-    const newKey = Math.random().toString(36).substring(2, 11);
+    // Generate simple incremental tournament ID (ignore timestamp-based IDs)
+    const existingKeys = Object.keys(localStorage).filter(key => key.startsWith('swissTournamentState-'));
+    const tournamentNumbers = existingKeys.map(key => {
+      const match = key.match(/swissTournamentState-(\d+)/);
+      const num = match ? parseInt(match[1]) : 0;
+      // Only consider IDs that are reasonable (not timestamps)
+      return num < 10000 ? num : 0;
+    }).filter(num => num > 0);
+    const nextId = tournamentNumbers.length > 0 ? Math.max(...tournamentNumbers) + 1 : 1;
+    const newTournamentId = nextId.toString();
+
+    const newKey = 'roshavi4ak'; // Fixed organizer key
     const round1Pairings = generateRound1Pairings(initialPlayers);
-    
+
     setOrganizerKey(newKey);
     setRole('ORGANIZER');
     window.location.hash = `#organizer-${newKey}`;
-    
+
     setPlayers(initialPlayers);
     setTotalRounds(rounds);
     setPairingsHistory([round1Pairings]);
     setCurrentRound(1);
     setStatus('IN_PROGRESS');
     setView('TOURNAMENT');
+
+    // Navigate to the tournament URL
+    window.history.pushState(null, '', `/${newTournamentId}`);
   };
   
   const handleNewTournament = () => {
     if (window.confirm(t.areYouSureDelete)) {
       // Clear the tournament state from local storage.
-      localStorage.removeItem('swissTournamentState');
-      
+      const tournamentId = getTournamentId();
+      if (tournamentId) {
+        localStorage.removeItem(`swissTournamentState-${tournamentId}`);
+      }
+
       // Reset all state variables to their initial values.
       setStatus('SETUP');
       setPlayers([]);
@@ -136,6 +233,16 @@ const App: React.FC = () => {
       // Clear the URL hash to remove the organizer key from the URL.
       // This prevents re-entering organizer mode on refresh.
       window.history.replaceState(null, '', window.location.pathname);
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    if (passwordInput === '1905') {
+      sessionStorage.setItem('authenticated', 'true');
+      setShowPasswordPrompt(false);
+      setPasswordInput('');
+    } else {
+      alert('Incorrect password');
     }
   };
 
@@ -744,6 +851,31 @@ const App: React.FC = () => {
       }, 250);
     };
   };
+
+  if (showPasswordPrompt) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+        <div className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md w-full">
+          <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">Enter Password</h2>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+            className="w-full bg-gray-700 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 mb-4"
+            placeholder="Enter password"
+            autoFocus
+          />
+          <button
+            onClick={handlePasswordSubmit}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (status === 'SETUP') {
     return <PlayerSetup onStart={handleStartTournament} />;

@@ -17,8 +17,17 @@ const ShareControl: React.FC<ShareControlProps> = ({ organizerKey, tournamentDat
 
   if (!organizerKey) return null;
 
-  const organizerUrl = `${window.location.origin}${window.location.pathname}#organizer-${organizerKey}`;
-  const observerUrl = `${window.location.origin}${window.location.pathname}`;
+  // Extract tournament ID from current URL path
+  const getTournamentId = () => {
+    const path = window.location.pathname;
+    const match = path.match(/\/(\d+)/);
+    return match ? match[1] : null;
+  };
+
+  const tournamentId = getTournamentId();
+  const baseUrl = tournamentId ? `${window.location.origin}/${tournamentId}` : window.location.origin;
+  const organizerUrl = `${baseUrl}#organizer-roshavi4ak`;
+  const observerUrl = baseUrl;
 
   const handleCopy = (type: 'organizer' | 'observer') => {
     const url = type === 'organizer' ? organizerUrl : observerUrl;
