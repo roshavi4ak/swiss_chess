@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Player } from '../types';
 import { ChessKingIcon } from './Icon';
 import { useI18n } from '../i18n/I18nContext';
+import TournamentList from './TournamentList';
 
 interface PlayerSetupProps {
   onStart: (players: Player[], rounds: number) => void;
@@ -27,6 +28,7 @@ const calculateRecommendedRounds = (playerCount: number): number => {
 
 const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
   const { t } = useI18n();
+  const [showTournamentList, setShowTournamentList] = useState(false);
   
   const [players, setPlayers] = useState(defaultPlayers);
   const [rounds, setRounds] = useState(() => calculateRecommendedRounds(defaultPlayers.length));
@@ -94,12 +96,35 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
     }));
     onStart(initialPlayers, rounds);
   };
+
+  const handleTournamentSelect = (tournamentId: string) => {
+    // Navigate to the selected tournament in ORGANIZER mode
+    window.location.href = `/${tournamentId}#organizer-roshavi4ak`;
+  };
+
+  const handleShowTournamentList = () => {
+    setShowTournamentList(true);
+  };
+
+  const handleCloseTournamentList = () => {
+    setShowTournamentList(false);
+  };
   
   const getInputClass = (hasError: boolean) => {
     const baseClasses = "bg-gray-800 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:outline-none";
     const errorClasses = "border border-red-500 focus:ring-red-500";
     return hasError ? `${baseClasses} ${errorClasses}` : baseClasses;
   };
+
+  // Show tournament list if requested
+  if (showTournamentList) {
+    return (
+      <TournamentList
+        onTournamentSelect={handleTournamentSelect}
+        onClose={handleCloseTournamentList}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-4">
@@ -108,6 +133,20 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({ onStart }) => {
           <ChessKingIcon className="w-16 h-16 mx-auto text-yellow-400" />
           <h1 className="text-4xl font-bold mt-2">{t.swissTournamentSetup}</h1>
           <p className="text-gray-400 mt-2">{t.enterPlayerDetails}</p>
+          
+          {/* Past Tournaments Button */}
+          <div className="mt-4">
+            <button
+              onClick={handleShowTournamentList}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2 mx-auto"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 1a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+              </svg>
+              Past Tournaments
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">

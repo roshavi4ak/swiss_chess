@@ -10,6 +10,7 @@ import History from './components/History';
 import SwapConfirmationDialog from './components/SwapConfirmationDialog';
 import LanguageSwitcher from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
+import { DataSync } from './services/api';
 
 
 // This interface will be used for the data passed to the Leaderboard component.
@@ -62,7 +63,8 @@ const App: React.FC = () => {
       };
       const tournamentId = getTournamentId();
       if (tournamentId) {
-        localStorage.setItem(`swissTournamentState-${tournamentId}`, JSON.stringify(stateToSave));
+        // Save to both localStorage and server using DataSync
+        DataSync.saveTournamentData(tournamentId, stateToSave);
       }
       return true;
     }
@@ -71,19 +73,26 @@ const App: React.FC = () => {
 
   // Load state from localStorage on initial component mount
   useEffect(() => {
-    try {
-      const tournamentId = getTournamentId();
-      const hash = window.location.hash;
+    const loadTournamentData = async () => {
+      try {
+        const tournamentId = getTournamentId();
+        const hash = window.location.hash;
+        console.log('App: loadTournamentData called', { tournamentId, hash });
 
-      if (tournamentId) {
-        // Load tournament-specific state
-        const savedStateJSON = localStorage.getItem(`swissTournamentState-${tournamentId}`);
-        if (savedStateJSON) {
-          const savedState = JSON.parse(savedStateJSON);
+        if (tournamentId) {
+          // Try to load from server first, fallback to localStorage
+          const savedState = await DataSync.loadTournamentData(tournamentId);
+          console.log('App: loaded state from DataSync', { savedState: savedState ? { status: savedState.status, organizerKey: savedState.organizerKey } : null });
+
           if (savedState && savedState.status !== 'SETUP') {
-            if (savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`) {
+            const isOrganizerHash = savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`;
+            console.log('App: determining role', { organizerKey: savedState.organizerKey, hash, isOrganizerHash });
+
+            if (isOrganizerHash) {
+              console.log('App: setting role to ORGANIZER');
               setRole('ORGANIZER');
             } else {
+              console.log('App: setting role to OBSERVER');
               setRole('OBSERVER');
             }
 
@@ -93,38 +102,43 @@ const App: React.FC = () => {
             setTotalRounds(savedState.totalRounds);
             setOrganizerKey(savedState.organizerKey);
             setStatus(savedState.status);
+          } else {
+            console.log('App: no valid saved state found, keeping default role OBSERVER');
           }
-        }
-      } else {
-        // Fallback to old single tournament logic for backward compatibility
-        const savedStateJSON = localStorage.getItem('swissTournamentState');
-        if (savedStateJSON) {
-          const savedState = JSON.parse(savedStateJSON);
-          if (savedState && savedState.status !== 'SETUP') {
-            if (savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`) {
-              setRole('ORGANIZER');
-            } else {
-              setRole('OBSERVER');
-            }
+        } else {
+          // Fallback to old single tournament logic for backward compatibility
+          const savedStateJSON = localStorage.getItem('swissTournamentState');
+          console.log('App: checking legacy localStorage', { savedStateJSON: !!savedStateJSON });
 
-            setPlayers(savedState.players);
-            setPairingsHistory(savedState.pairingsHistory);
-            setCurrentRound(savedState.currentRound);
-            setTotalRounds(savedState.totalRounds);
-            setOrganizerKey(savedState.organizerKey);
-            setStatus(savedState.status);
+          if (savedStateJSON) {
+            const savedState = JSON.parse(savedStateJSON);
+            if (savedState && savedState.status !== 'SETUP') {
+              const isOrganizerHash = savedState.organizerKey && hash === `#organizer-${savedState.organizerKey}`;
+              console.log('App: legacy determining role', { organizerKey: savedState.organizerKey, hash, isOrganizerHash });
+
+              if (isOrganizerHash) {
+                console.log('App: legacy setting role to ORGANIZER');
+                setRole('ORGANIZER');
+              } else {
+                console.log('App: legacy setting role to OBSERVER');
+                setRole('OBSERVER');
+              }
+
+              setPlayers(savedState.players);
+              setPairingsHistory(savedState.pairingsHistory);
+              setCurrentRound(savedState.currentRound);
+              setTotalRounds(savedState.totalRounds);
+              setOrganizerKey(savedState.organizerKey);
+              setStatus(savedState.status);
+            }
           }
         }
+      } catch (error) {
+        console.error("Failed to load tournament state", error);
       }
-    } catch (error) {
-      console.error("Failed to load tournament state from localStorage", error);
-      const tournamentId = getTournamentId();
-      if (tournamentId) {
-        localStorage.removeItem(`swissTournamentState-${tournamentId}`);
-      } else {
-        localStorage.removeItem('swissTournamentState');
-      }
-    }
+    };
+
+    loadTournamentData();
   }, []);
 
   // Auto-save state to localStorage whenever it changes
@@ -178,24 +192,24 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartTournament = (initialPlayers: Player[], rounds: number) => {
-    // Generate simple incremental tournament ID (ignore timestamp-based IDs)
-    const existingKeys = Object.keys(localStorage).filter(key => key.startsWith('swissTournamentState-'));
-    const tournamentNumbers = existingKeys.map(key => {
-      const match = key.match(/swissTournamentState-(\d+)/);
-      const num = match ? parseInt(match[1]) : 0;
-      // Only consider IDs that are reasonable (not timestamps)
-      return num < 10000 ? num : 0;
-    }).filter(num => num > 0);
-    const nextId = tournamentNumbers.length > 0 ? Math.max(...tournamentNumbers) + 1 : 1;
-    const newTournamentId = nextId.toString();
+  const handleStartTournament = async (initialPlayers: Player[], rounds: number) => {
+    // Use DataSync to create a new tournament with proper ID management
+    const newTournamentId = await DataSync.createNewTournament({
+      status: 'IN_PROGRESS',
+      players: initialPlayers,
+      pairingsHistory: [],
+      currentRound: 1,
+      totalRounds: rounds,
+      organizerKey: 'roshavi4ak',
+      created: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+    });
 
     const newKey = 'roshavi4ak'; // Fixed organizer key
     const round1Pairings = generateRound1Pairings(initialPlayers);
 
     setOrganizerKey(newKey);
     setRole('ORGANIZER');
-    window.location.hash = `#organizer-${newKey}`;
 
     setPlayers(initialPlayers);
     setTotalRounds(rounds);
@@ -204,8 +218,9 @@ const App: React.FC = () => {
     setStatus('IN_PROGRESS');
     setView('TOURNAMENT');
 
-    // Navigate to the tournament URL
+    // Navigate to the tournament URL and ensure organizer hash is present
     window.history.pushState(null, '', `/${newTournamentId}`);
+    window.location.hash = `#organizer-${newKey}`;
   };
   
   const handleNewTournament = () => {
@@ -892,7 +907,18 @@ const App: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-8 no-print">
             <div className="flex justify-between items-start">
-                <div className="flex-1"></div>
+                <div className="flex-1 flex justify-start">
+                    <button
+                        onClick={() => window.location.href = '/'}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2 mt-4"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                            <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 1a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                        </svg>
+                        Past Tournaments
+                    </button>
+                </div>
                 <div className="inline-flex justify-center items-center gap-4 relative">
                     <ChessKingIcon className="w-10 h-10 text-yellow-400"/>
                     <h1 className="text-4xl font-bold">{t.swissTournament}</h1>

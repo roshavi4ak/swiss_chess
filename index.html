@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swiss System Chess Tournament</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css" />
   <script type="importmap">
 {
   "imports": {
@@ -15,68 +16,6 @@
   }
 }
 </script>
-<style>
-  @media print {
-    body {
-      margin: 0;
-      padding: 20px;
-      background: white !important;
-      color: black !important;
-      font-family: Arial, sans-serif;
-    }
-    
-    .no-print {
-      display: none !important;
-    }
-    
-    .printable-section {
-      display: block !important;
-      visibility: visible !important;
-      position: static !important;
-      background: white !important;
-      color: black !important;
-      box-shadow: none !important;
-      border: 1px solid #ddd !important;
-      margin: 0 !important;
-      padding: 20px !important;
-    }
-    
-    .printable-section * {
-      background: white !important;
-      color: black !important;
-    }
-    
-    .printable-section h2 {
-      color: #000 !important;
-      border-bottom: 2px solid #000 !important;
-      padding-bottom: 10px !important;
-      margin-bottom: 20px !important;
-    }
-    
-    .printable-section .bg-gray-800,
-    .printable-section .bg-gray-700 {
-      background: white !important;
-      border: 1px solid #ddd !important;
-    }
-    
-    .printable-section .text-yellow-400,
-    .printable-section .text-white {
-      color: #000 !important;
-    }
-    
-    .printable-section .border-gray-600 {
-      border-color: #ddd !important;
-    }
-    
-    .print-only-header {
-      display: block !important;
-      text-align: center !important;
-      margin-bottom: 20px !important;
-      font-size: 24px !important;
-      font-weight: bold !important;
-    }
-  }
-</style>
 </head>
   <body class="bg-gray-900 text-white">
     <div id="root"></div>

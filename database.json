@@ -1,0 +1,13 @@
+{
+"settings": {
+"defaultPassword": "1905",
+"maxTournaments": 1000,
+"autoCleanup": true
+},
+"stats": {
+"totalTournaments": 0,
+"totalPlayers": 0,
+"lastBackup": null
+},
+"tournaments": {}
+}
