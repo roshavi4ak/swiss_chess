@@ -31,6 +31,7 @@ mkdir -p deploy/chess-tournament
 # Copy necessary files
 cp package.json deploy/chess-tournament/
 cp server.js deploy/chess-tournament/
+cp database.js deploy/chess-tournament/
 cp .htaccess deploy/chess-tournament/
 cp -r dist deploy/chess-tournament/
 
@@ -43,10 +44,11 @@ echo "✅ Deployment package created: deploy/chess-tournament-deploy.zip"
 echo ""
 echo "📋 Next steps:"
 echo "1. Upload 'deploy/chess-tournament-deploy.zip' to your cPanel"
-echo "2. Extract it in your domain's public directory"
-echo "3. Set up Node.js application in cPanel"
-echo "4. Run 'npm install' in the application directory"
-echo "5. Start the Node.js application"
+echo "2. Extract it in your domain's public directory (e.g., public_html/chess-tournament)"
+echo "3. If using cPanel Node.js App Manager, delete '.htaccess' from the application directory"
+echo "4. Set up Node.js application in cPanel"
+echo "5. Run 'npm ci --omit=dev' in the application directory"
+echo "6. Start the Node.js application"
 echo ""
 echo "🌐 Your tournament URLs will be:"
 echo "   - https://chess.belovezem.com (main setup)"

@@ -28,17 +28,19 @@ This creates a `dist` folder with your compiled application.
 
 2. **Open File Manager**
    - Click on "File Manager" in the Files section
-   - Navigate to your domain's public directory (usually `public_html` or `www`)
+   - Navigate to your domain's document root: `/home/andrey12/chess.belovezem.com/public_html`
 
-3. **Clean the Directory**
-   - Remove any existing files in the root directory
-   - Create a new directory called `chess-tournament` if needed
+3. **Prepare the Target Directory**
+   - Create an application directory: `/home/andrey12/chess.belovezem.com/public_html/chess-tournament`
+   - Do NOT delete your entire `public_html`. The application will be in a subdirectory and mapped via cPanel Node.js App Manager.
 
 4. **Upload the Following Files:**
    - `package.json` (from your project root)
    - `server.js` (from your project root)
+   - `database.js` (required for API and persistence)
    - `dist` folder (entire contents)
-   - `node_modules` folder (if you have it locally, or install via SSH)
+   - `database.json` (optional; will be created on first write if missing)
+   - `.htaccess` (only if deploying as a static SPA without the Node.js App Manager; do NOT include this when using the cPanel Node.js App Manager to avoid interfering with API routes)
 
 ### 3. Install Node.js Application
 
@@ -50,19 +52,23 @@ This creates a `dist` folder with your compiled application.
 2. **Create New Application**
    - Application mode: **Production**
    - Node.js version: **18.x or higher**
-   - Application root: `/public_html/chess-tournament` (or your chosen directory)
+   - Application root: `/home/andrey12/chess.belovezem.com/public_html/chess-tournament`
    - Application startup file: `server.js`
    - Application URL: `chess.belovezem.com`
+   - Application URI/Route: `/` (root path for the domain)
 
 3. **Install Dependencies**
-   - Go to the application directory via SSH or Terminal in cPanel
-   - Run: `npm install`
+   - Use the "Run NPM Install" button in cPanel, or via Terminal run:
+     - `npm ci --omit=dev`
+   - Do NOT upload `node_modules`; let the server install dependencies.
+
+   Important: If you are using the cPanel Node.js App Manager, delete the `.htaccess` file located in your application root (`/home/andrey12/chess.belovezem.com/public_html/chess-tournament`). Apache rewrites in `.htaccess` will otherwise intercept `/api/*` requests and return `index.html` instead of your JSON API.
 
 #### Option B: Using SSH (if available)
 1. **Connect via SSH**
    ```bash
-   ssh username@your-server.com
-   cd /public_html/chess-tournament
+   ssh andrey12@your-server.com
+   cd /home/andrey12/chess.belovezem.com/public_html/chess-tournament
    ```
 
 2. **Install Dependencies**
@@ -89,8 +95,9 @@ Your application will handle these URL patterns:
 In cPanel Node.js settings, set:
 ```
 NODE_ENV=production
-PORT=8080
 ```
+
+Do NOT set PORT manually. cPanel provides PORT automatically and the server reads it from the environment.
 
 ### 6. Start the Application
 
@@ -126,8 +133,9 @@ PORT=8080
    - Verify `server.js` path in cPanel settings
 
 2. **Port Already in Use**
-   - Change PORT environment variable to `8081` or `3000`
-   - Check if another Node.js app is using the same port
+   - Do NOT set PORT in cPanel. Remove any manual PORT environment variable; cPanel assigns it automatically.
+   - Restart the Node.js application from cPanel.
+   - Ensure the server reads the port from the environment as in [server.js](server.js:10).
 
 3. **404 Errors on Direct URLs**
    - Ensure your `server.js` has the `app.get('*')` route handler
@@ -141,6 +149,10 @@ PORT=8080
    - Check that localStorage/sessionStorage is working
    - Clear browser cache and cookies
    - Verify the password is `1905` in the source code
+
+6. **API endpoints return HTML or 404**
+   - If you uploaded `.htaccess`, remove it when using the cPanel Node.js App Manager. The SPA rewrite can intercept `/api/*` requests before they reach Node.
+   - Ensure the Node.js app is started and the Application URI is set correctly in cPanel.
 
 ### File Permissions
 - Set folders to `755` (rwxr-xr-x)
@@ -172,8 +184,8 @@ PORT=8080
 3. Clear browser cache
 
 ### Backup
-- Regularly backup your `public_html/chess-tournament` directory
-- Consider backing up tournament data (stored in browser localStorage)
+- Regularly backup your `/home/andrey12/chess.belovezem.com/public_html/chess-tournament` directory
+- Backup the `database.json` file which stores all tournament data
 
 ### Monitoring
 - Monitor application logs in cPanel
@@ -191,7 +203,7 @@ If you encounter issues:
 
 ```bash
 # Install dependencies
-npm install
+npm ci --omit=dev
 
 # Start production server
 npm start

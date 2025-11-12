@@ -8,12 +8,17 @@
 
 2. **Upload to cPanel**
    - Upload `deploy/chess-tournament-deploy.zip`
-   - Extract in your domain's public directory
+   - Extract into `/home/andrey12/chess.belovezem.com/public_html/chess-tournament`. Do NOT delete existing content in `public_html`.
+   - Ensure `database.js` is present (the script copies it; it's required by the server).
+   - If you will run via cPanel Node.js App Manager, you can delete the included `.htaccess` (it's only for static hosting and can interfere with API routes).
 
 3. **Set up Node.js App**
    - In cPanel, create Node.js application
-   - Point to `server.js` as startup file
-   - Run `npm install`
+   - Application URI: `/` (root)
+   - Startup file: `server.js`
+   - Click 'Run NPM Install' or run `npm ci --omit=dev` in the Terminal
+   - Do not upload `node_modules`
+   - Ensure there is no `.htaccess` in the application directory
 
 4. **Start the Application**
    - Start the Node.js app in cPanel

@@ -42,6 +42,7 @@ const App: React.FC = () => {
   const [pendingSwap, setPendingSwap] = useState<PendingSwap | null>(null);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
 
   // Extract tournament ID from URL path
@@ -135,6 +136,9 @@ const App: React.FC = () => {
         }
       } catch (error) {
         console.error("Failed to load tournament state", error);
+      } finally {
+        // Always set loading to false when data loading is complete
+        setIsLoading(false);
       }
     };
 
@@ -867,6 +871,18 @@ const App: React.FC = () => {
     };
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+        <div className="bg-gray-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <h2 className="text-xl font-bold text-yellow-400 mb-2">Loading Tournament...</h2>
+          <p className="text-gray-300">Please wait while we load the tournament data</p>
+        </div>
+      </div>
+    );
+  }
+
   if (showPasswordPrompt) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
@@ -908,16 +924,18 @@ const App: React.FC = () => {
         <header className="text-center mb-8 no-print">
             <div className="flex justify-between items-start">
                 <div className="flex-1 flex justify-start">
-                    <button
-                        onClick={() => window.location.href = '/'}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2 mt-4"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                            <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 1a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                        </svg>
-                        Past Tournaments
-                    </button>
+                    {isOrganizerView && (
+                        <button
+                            onClick={() => window.location.href = '/'}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center gap-2 mt-4"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 1a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                            </svg>
+                            Past Tournaments
+                        </button>
+                    )}
                 </div>
                 <div className="inline-flex justify-center items-center gap-4 relative">
                     <ChessKingIcon className="w-10 h-10 text-yellow-400"/>
