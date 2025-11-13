@@ -1,13 +1,530 @@
 {
-"settings": {
-"defaultPassword": "1905",
-"maxTournaments": 1000,
-"autoCleanup": true
+  "settings": {
+  "defaultPassword": "1905",
+  "maxTournaments": 1000,
+  "autoCleanup": true
 },
-"stats": {
-"totalTournaments": 0,
-"totalPlayers": 0,
-"lastBackup": null
+  "stats": {
+  "totalTournaments": 2,
+  "totalPlayers": 0,
+  "lastBackup": null
 },
-"tournaments": {}
+  "tournaments": {
+    "1": {
+          "status": "IN_PROGRESS",
+          "players": [
+                {
+                      "name": "Magnus Carlsen",
+                      "elo": 2830,
+                      "id": 1,
+                      "score": 1,
+                      "opponents": [
+                            5
+                      ],
+                      "colorHistory": [
+                            "white"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Fabiano Caruana",
+                      "elo": 2805,
+                      "id": 2,
+                      "score": 0.5,
+                      "opponents": [
+                            6
+                      ],
+                      "colorHistory": [
+                            "white"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Hikaru Nakamura",
+                      "elo": 2794,
+                      "id": 3,
+                      "score": 1,
+                      "opponents": [
+                            7
+                      ],
+                      "colorHistory": [
+                            "white"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Ding Liren",
+                      "elo": 2775,
+                      "id": 4,
+                      "score": 1,
+                      "opponents": [
+                            8
+                      ],
+                      "colorHistory": [
+                            "white"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Ian Nepomniachtchi",
+                      "elo": 2770,
+                      "id": 5,
+                      "score": 0,
+                      "opponents": [
+                            1
+                      ],
+                      "colorHistory": [
+                            "black"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Alireza Firouzja",
+                      "elo": 2763,
+                      "id": 6,
+                      "score": 0.5,
+                      "opponents": [
+                            2
+                      ],
+                      "colorHistory": [
+                            "black"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Wesley So",
+                      "elo": 2757,
+                      "id": 7,
+                      "score": 0,
+                      "opponents": [
+                            3
+                      ],
+                      "colorHistory": [
+                            "black"
+                      ],
+                      "hadBye": false
+                },
+                {
+                      "name": "Anish Giri",
+                      "elo": 2754,
+                      "id": 8,
+                      "score": 0,
+                      "opponents": [
+                            4
+                      ],
+                      "colorHistory": [
+                            "black"
+                      ],
+                      "hadBye": false
+                }
+          ],
+          "pairingsHistory": [
+                [
+                      {
+                            "round": 1,
+                            "table": 1,
+                            "white": {
+                                  "name": "Magnus Carlsen",
+                                  "elo": 2830,
+                                  "id": 1,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Ian Nepomniachtchi",
+                                  "elo": 2770,
+                                  "id": 5,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": "1-0"
+                      },
+                      {
+                            "round": 1,
+                            "table": 2,
+                            "white": {
+                                  "name": "Fabiano Caruana",
+                                  "elo": 2805,
+                                  "id": 2,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Alireza Firouzja",
+                                  "elo": 2763,
+                                  "id": 6,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": "1/2-1/2"
+                      },
+                      {
+                            "round": 1,
+                            "table": 3,
+                            "white": {
+                                  "name": "Hikaru Nakamura",
+                                  "elo": 2794,
+                                  "id": 3,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Wesley So",
+                                  "elo": 2757,
+                                  "id": 7,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": "1-0"
+                      },
+                      {
+                            "round": 1,
+                            "table": 4,
+                            "white": {
+                                  "name": "Ding Liren",
+                                  "elo": 2775,
+                                  "id": 4,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Anish Giri",
+                                  "elo": 2754,
+                                  "id": 8,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": "1-0"
+                      }
+                ],
+                [
+                      {
+                            "round": 2,
+                            "table": 1,
+                            "white": {
+                                  "name": "Magnus Carlsen",
+                                  "elo": 2830,
+                                  "id": 1,
+                                  "score": 1,
+                                  "opponents": [
+                                        5
+                                  ],
+                                  "colorHistory": [
+                                        "white"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Hikaru Nakamura",
+                                  "elo": 2794,
+                                  "id": 3,
+                                  "score": 1,
+                                  "opponents": [
+                                        7
+                                  ],
+                                  "colorHistory": [
+                                        "white"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 2,
+                            "table": 2,
+                            "white": {
+                                  "name": "Fabiano Caruana",
+                                  "elo": 2805,
+                                  "id": 2,
+                                  "score": 0.5,
+                                  "opponents": [
+                                        6
+                                  ],
+                                  "colorHistory": [
+                                        "white"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Ding Liren",
+                                  "elo": 2775,
+                                  "id": 4,
+                                  "score": 1,
+                                  "opponents": [
+                                        8
+                                  ],
+                                  "colorHistory": [
+                                        "white"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 2,
+                            "table": 3,
+                            "white": {
+                                  "name": "Ian Nepomniachtchi",
+                                  "elo": 2770,
+                                  "id": 5,
+                                  "score": 0,
+                                  "opponents": [
+                                        1
+                                  ],
+                                  "colorHistory": [
+                                        "black"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Alireza Firouzja",
+                                  "elo": 2763,
+                                  "id": 6,
+                                  "score": 0.5,
+                                  "opponents": [
+                                        2
+                                  ],
+                                  "colorHistory": [
+                                        "black"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 2,
+                            "table": 4,
+                            "white": {
+                                  "name": "Wesley So",
+                                  "elo": 2757,
+                                  "id": 7,
+                                  "score": 0,
+                                  "opponents": [
+                                        3
+                                  ],
+                                  "colorHistory": [
+                                        "black"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Anish Giri",
+                                  "elo": 2754,
+                                  "id": 8,
+                                  "score": 0,
+                                  "opponents": [
+                                        4
+                                  ],
+                                  "colorHistory": [
+                                        "black"
+                                  ],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      }
+                ]
+          ],
+          "currentRound": 2,
+          "totalRounds": 3,
+          "organizerKey": "roshavi4ak",
+          "created": "2025-11-12T23:01:36.138Z",
+          "lastUpdated": "2025-11-12T23:02:38.957Z",
+          "id": "1"
+    },
+    "2": {
+          "status": "IN_PROGRESS",
+          "players": [
+                {
+                      "name": "Magnus Carlsen",
+                      "elo": 2830,
+                      "id": 1,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Fabiano Caruana",
+                      "elo": 2805,
+                      "id": 2,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Hikaru Nakamura",
+                      "elo": 2794,
+                      "id": 3,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Ding Liren",
+                      "elo": 2775,
+                      "id": 4,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Ian Nepomniachtchi",
+                      "elo": 2770,
+                      "id": 5,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Alireza Firouzja",
+                      "elo": 2763,
+                      "id": 6,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Wesley So",
+                      "elo": 2757,
+                      "id": 7,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                },
+                {
+                      "name": "Anish Giri",
+                      "elo": 2754,
+                      "id": 8,
+                      "score": 0,
+                      "opponents": [],
+                      "colorHistory": [],
+                      "hadBye": false
+                }
+          ],
+          "pairingsHistory": [
+                [
+                      {
+                            "round": 1,
+                            "table": 1,
+                            "white": {
+                                  "name": "Magnus Carlsen",
+                                  "elo": 2830,
+                                  "id": 1,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Ian Nepomniachtchi",
+                                  "elo": 2770,
+                                  "id": 5,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 1,
+                            "table": 2,
+                            "white": {
+                                  "name": "Fabiano Caruana",
+                                  "elo": 2805,
+                                  "id": 2,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Alireza Firouzja",
+                                  "elo": 2763,
+                                  "id": 6,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 1,
+                            "table": 3,
+                            "white": {
+                                  "name": "Hikaru Nakamura",
+                                  "elo": 2794,
+                                  "id": 3,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Wesley So",
+                                  "elo": 2757,
+                                  "id": 7,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      },
+                      {
+                            "round": 1,
+                            "table": 4,
+                            "white": {
+                                  "name": "Ding Liren",
+                                  "elo": 2775,
+                                  "id": 4,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "black": {
+                                  "name": "Anish Giri",
+                                  "elo": 2754,
+                                  "id": 8,
+                                  "score": 0,
+                                  "opponents": [],
+                                  "colorHistory": [],
+                                  "hadBye": false
+                            },
+                            "result": null
+                      }
+                ]
+          ],
+          "currentRound": 1,
+          "totalRounds": 3,
+          "organizerKey": "roshavi4ak",
+          "created": "2025-11-13T06:08:30.165Z",
+          "lastUpdated": "2025-11-13T06:08:36.046Z",
+          "id": "2"
+    }
+  }
 }

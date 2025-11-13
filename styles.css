@@ -59,9 +59,52 @@
   }
 }
 
+/* Mobile responsive improvements */
+@media (max-width: 640px) {
+  /* Improve button sizing on mobile */
+  .result-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    min-width: 2.5rem;
+  }
+  
+  /* Better spacing for pairing cards on mobile */
+  .print-pairing-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Adjust table header for mobile */
+  table th, table td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Improve header spacing on mobile */
+  header h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Better button layout on mobile */
+  .no-print {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Adjust grid gaps on mobile */
+  .grid {
+    gap: 1rem;
+  }
+}
+
 /* Base styles */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Improved scroll behavior */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }

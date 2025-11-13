@@ -21,9 +21,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
   });
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl shadow-lg h-full">
+    <div className="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-yellow-400">{t.leaderboard}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-yellow-400">{t.leaderboard}</h2>
         {players.length > 0 && isOrganizer && (
           <button
             onClick={onPrint}
@@ -32,19 +32,49 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
             aria-label="Save leaderboard as PDF or print"
           >
             <PrintIcon className="h-4 w-4" />
-            <span>PDF / Print</span>
+            <span className="hidden sm:inline">PDF / Print</span>
           </button>
         )}
       </div>
-      <div className="overflow-x-auto">
+      
+      {/* Mobile Card Layout */}
+      <div className="block sm:hidden">
+        <div className="space-y-2">
+          {sortedPlayers.map((player, index) => (
+            <div key={player.id} className="bg-gray-700 p-3 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-yellow-400">#{index + 1}</span>
+                  <div>
+                    <div className="font-medium text-white">{player.name}</div>
+                    <div className="text-xs text-gray-400">ELO: {player.elo}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-mono text-white">{player.score.toFixed(1)}</div>
+                  <div className="text-xs text-gray-400">{t.points}</div>
+                </div>
+              </div>
+              {player.fullColorHistory.length > 0 && (
+                <div className="text-center font-mono text-xs text-gray-400">
+                  {player.fullColorHistory.join(' ')}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop Table Layout */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left">
           <thead className="border-b border-gray-600">
             <tr>
-              <th className="p-3">{t.rank}</th>
-              <th className="p-3">{t.player}</th>
-              <th className="p-3 text-center">{t.colorHistory}</th>
-              <th className="p-3 text-right">{t.score}</th>
-              <th className="p-3 text-right">{t.elo}</th>
+              <th className="p-3 font-bold text-yellow-400">#{t.rank}</th>
+              <th className="p-3 font-bold text-yellow-400">{t.player}</th>
+              <th className="p-3 text-center font-bold text-yellow-400 hidden md:table-cell">{t.colorHistory}</th>
+              <th className="p-3 text-right font-bold text-yellow-400">{t.score}</th>
+              <th className="p-3 text-right font-bold text-yellow-400">{t.elo}</th>
             </tr>
           </thead>
           <tbody>
@@ -52,7 +82,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
               <tr key={player.id} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50">
                 <td className="p-3 font-semibold">{index + 1}</td>
                 <td className="p-3">{player.name}</td>
-                <td className="p-3 text-center font-mono text-xs text-gray-400">
+                <td className="p-3 text-center font-mono text-xs text-gray-400 hidden md:table-cell">
                   {player.fullColorHistory.join(' ')}
                 </td>
                 <td className="p-3 text-right font-mono">{player.score.toFixed(1)}</td>

@@ -62,35 +62,23 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
               
               {pairing.black ? (
                 <>
-                  <div className="flex justify-between items-center">
-                    <div
-                      className={`flex-1 text-left p-2 rounded-lg transition-all ${isOrganizer ? 'cursor-pointer hover:bg-gray-600/50' : ''} ${isWhiteSelected ? 'ring-2 ring-yellow-400 bg-gray-600' : ''}`}
-                      onClick={() => isOrganizer && onPlayerSelectForSwap(pairing.white.id, pairing.table)}
-                      aria-label={isOrganizer ? `Select ${pairing.white.name} to swap` : undefined}
-                      role={isOrganizer ? "button" : undefined}
-                      tabIndex={isOrganizer ? 0 : -1}
-                    >
-                      <span className="font-semibold text-white">{pairing.white.name}</span>
-                      <span className="text-gray-400 ml-2 text-sm">({pairing.white.elo})</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                    <div className="text-left">
+                      <div className="font-semibold text-white text-sm sm:text-base">{pairing.white.name}</div>
+                      <div className="text-gray-400 text-xs">({pairing.white.elo})</div>
                     </div>
-                    <div className="font-bold text-yellow-400 mx-4 text-center w-12 text-sm">
+                    <div className="font-bold text-yellow-400 text-center text-sm">
                       vs
                     </div>
-                    <div
-                      className={`flex-1 text-right p-2 rounded-lg transition-all ${isOrganizer ? 'cursor-pointer hover:bg-gray-600/50' : ''} ${isBlackSelected ? 'ring-2 ring-yellow-400 bg-gray-600' : ''}`}
-                      onClick={() => isOrganizer && pairing.black && onPlayerSelectForSwap(pairing.black.id, pairing.table)}
-                      aria-label={isOrganizer ? `Select ${pairing.black.name} to swap` : undefined}
-                      role={isOrganizer ? "button" : undefined}
-                      tabIndex={isOrganizer ? 0 : -1}
-                    >
-                      <span className="text-gray-400 mr-2 text-sm">({pairing.black.elo})</span>
-                      <span className="font-semibold text-white">{pairing.black.name}</span>
+                    <div className="text-right">
+                      <div className="font-semibold text-white text-sm sm:text-base">{pairing.black.name}</div>
+                      <div className="text-gray-400 text-xs">({pairing.black.elo})</div>
                     </div>
                   </div>
                   {/* Results section - shown for both organizers and observers */}
                   <div className="mt-3 pt-3 border-t border-gray-600 no-print">
                     {isOrganizer ? (
-                      <div className="flex justify-center items-center gap-2">
+                      <div className="flex justify-center items-center gap-1 sm:gap-2">
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '1-0')} selected={pairing.result === '1-0'}>1-0</ResultButton>
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '1/2-1/2')} selected={pairing.result === '1/2-1/2'}>½-½</ResultButton>
                         <ResultButton onClick={() => onResultUpdate(pairing.table, '0-1')} selected={pairing.result === '0-1'}>0-1</ResultButton>
@@ -105,7 +93,7 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                       </div>
                     ) : (
                       /* Observer view - show results in read-only format */
-                      <div className="flex justify-center items-center gap-2">
+                      <div className="flex justify-center items-center gap-1 sm:gap-2">
                         <div className={`py-2 px-3 rounded-md text-xs font-semibold ${
                           pairing.result === '1-0'
                             ? 'bg-yellow-500 text-gray-900'
@@ -132,18 +120,12 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                   </div>
                 </>
               ) : (
-                <div className="flex justify-between items-center">
-                    <div
-                      className={`flex items-center gap-3 p-2 rounded-lg transition-all ${isOrganizer ? 'cursor-pointer hover:bg-gray-600/50' : ''} ${isWhiteSelected ? 'ring-2 ring-yellow-400 bg-gray-600' : ''}`}
-                      onClick={() => isOrganizer && onPlayerSelectForSwap(pairing.white.id, pairing.table)}
-                      aria-label={isOrganizer ? `Select ${pairing.white.name} to swap` : undefined}
-                      role={isOrganizer ? "button" : undefined}
-                      tabIndex={isOrganizer ? 0 : -1}
-                    >
-                        <span className="font-semibold text-white">{pairing.white.name}</span>
-                        <span className="text-gray-400 ml-2 text-sm">({pairing.white.elo})</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                    <div className="text-left">
+                        <div className="font-semibold text-white text-sm sm:text-base">{pairing.white.name}</div>
+                        <div className="text-gray-400 text-xs">({pairing.white.elo})</div>
                     </div>
-                    <div className="bg-green-600 text-white font-bold py-1 px-3 rounded-full text-xs">
+                    <div className="bg-green-600 text-white font-bold py-1 px-3 rounded-full text-xs self-center">
                         BYE
                     </div>
                 </div>

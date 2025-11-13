@@ -53,7 +53,8 @@ const App: React.FC = () => {
   };
   // Logic to save state, extracted to be reusable
   const saveStateToLocalStorage = useCallback(() => {
-    if (status !== 'SETUP') {
+    // Only save state if not in SETUP status AND user is ORGANIZER
+    if (status !== 'SETUP' && role === 'ORGANIZER') {
       const stateToSave = {
         status,
         players,
@@ -70,7 +71,7 @@ const App: React.FC = () => {
       return true;
     }
     return false;
-  }, [status, players, pairingsHistory, currentRound, totalRounds, organizerKey]);
+  }, [status, players, pairingsHistory, currentRound, totalRounds, organizerKey, role]);
 
   // Load state from localStorage on initial component mount
   useEffect(() => {
@@ -175,19 +176,56 @@ const App: React.FC = () => {
     checkPasswordProtection();
   }, []);
 
-  // Auto-refresh for observer pages every 10 seconds
+  // Smart data polling for observer pages - only update when data changes
   useEffect(() => {
     const tournamentId = getTournamentId();
     
-    // Only refresh observer pages (not root URL, not organizer pages)
+    // Only poll observer pages (not root URL, not organizer pages)
     if (tournamentId && role === 'OBSERVER') {
-      const refreshInterval = setInterval(() => {
-        window.location.reload();
-      }, 10000); // 10 seconds
+      const pollForUpdates = async () => {
+        try {
+          console.log('Observer: Checking for tournament updates...');
+          const latestData = await DataSync.loadTournamentData(tournamentId);
+          
+          if (latestData && latestData.status !== 'SETUP') {
+            // Compare with current state to see if anything changed
+            const hasChanges =
+              latestData.status !== status ||
+              latestData.currentRound !== currentRound ||
+              latestData.totalRounds !== totalRounds ||
+              JSON.stringify(latestData.players) !== JSON.stringify(players) ||
+              JSON.stringify(latestData.pairingsHistory) !== JSON.stringify(pairingsHistory);
+            
+            if (hasChanges) {
+              console.log('Observer: Tournament data changed, updating display...');
+              
+              // Only update the state if there are actual changes
+              setPlayers(latestData.players);
+              setPairingsHistory(latestData.pairingsHistory);
+              setCurrentRound(latestData.currentRound);
+              setTotalRounds(latestData.totalRounds);
+              setStatus(latestData.status);
+              setOrganizerKey(latestData.organizerKey);
+              
+              console.log('Observer: Tournament display updated with latest data');
+            } else {
+              console.log('Observer: No changes detected');
+            }
+          }
+        } catch (error) {
+          console.error('Observer: Error checking for updates:', error);
+        }
+      };
 
-      return () => clearInterval(refreshInterval);
+      // Initial check
+      pollForUpdates();
+      
+      // Poll every 10 seconds for updates
+      const pollInterval = setInterval(pollForUpdates, 10000);
+
+      return () => clearInterval(pollInterval);
     }
-  }, [role]);
+  }, [role, status, currentRound, totalRounds, players, pairingsHistory]);
 
   const handleManualSave = () => {
     if (saveStateToLocalStorage()) {
@@ -950,8 +988,8 @@ const App: React.FC = () => {
             </div>
         </header>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div id="pairings-section" className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div id="pairings-section" className="order-1 lg:order-1 lg:col-span-2">
             <Pairings
               pairings={currentPairings}
               onResultUpdate={handleResultUpdate}
@@ -962,7 +1000,7 @@ const App: React.FC = () => {
               onPrint={() => handlePrint('pairings-section')}
             />
           </div>
-          <div id="leaderboard-section" className="lg:col-span-1">
+          <div id="leaderboard-section" className="order-2 lg:order-2 lg:col-span-1">
             <Leaderboard players={livePlayers} onPrint={() => handlePrint('leaderboard-section')} isOrganizer={isOrganizerView} />
           </div>
         </div>
