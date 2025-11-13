@@ -63,16 +63,26 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
               {pairing.black ? (
                 <>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-                    <div className="text-left">
-                      <div className="font-semibold text-white text-sm sm:text-base">{pairing.white.name}</div>
-                      <div className="text-gray-400 text-xs">({pairing.white.elo})</div>
+                    <div className={`text-left ${isOrganizer ? 'cursor-pointer hover:bg-gray-600 p-2 rounded-md transition-colors' : ''}`}
+                         onClick={isOrganizer ? () => onPlayerSelectForSwap(pairing.white.id, pairing.table) : undefined}>
+                      <div className={`font-semibold text-sm sm:text-base ${isWhiteSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
+                        {pairing.white.name}
+                      </div>
+                      <div className={`text-xs ${isWhiteSelected ? 'text-yellow-200' : 'text-gray-400'}`}>
+                        ({pairing.white.elo})
+                      </div>
                     </div>
                     <div className="font-bold text-yellow-400 text-center text-sm">
                       vs
                     </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-white text-sm sm:text-base">{pairing.black.name}</div>
-                      <div className="text-gray-400 text-xs">({pairing.black.elo})</div>
+                    <div className={`text-right ${isOrganizer ? 'cursor-pointer hover:bg-gray-600 p-2 rounded-md transition-colors' : ''}`}
+                         onClick={isOrganizer ? () => onPlayerSelectForSwap(pairing.black.id, pairing.table) : undefined}>
+                      <div className={`font-semibold text-sm sm:text-base ${isBlackSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
+                        {pairing.black.name}
+                      </div>
+                      <div className={`text-xs ${isBlackSelected ? 'text-yellow-200' : 'text-gray-400'}`}>
+                        ({pairing.black.elo})
+                      </div>
                     </div>
                   </div>
                   {/* Results section - shown for both organizers and observers */}

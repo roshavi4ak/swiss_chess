@@ -429,24 +429,24 @@
                             "round": 1,
                             "table": 1,
                             "white": {
-                                  "name": "Magnus Carlsen",
-                                  "elo": 2830,
-                                  "id": 1,
+                                  "name": "Alireza Firouzja",
+                                  "elo": 2763,
+                                  "id": 6,
                                   "score": 0,
                                   "opponents": [],
                                   "colorHistory": [],
                                   "hadBye": false
                             },
                             "black": {
-                                  "name": "Ian Nepomniachtchi",
-                                  "elo": 2770,
-                                  "id": 5,
+                                  "name": "Hikaru Nakamura",
+                                  "elo": 2794,
+                                  "id": 3,
                                   "score": 0,
                                   "opponents": [],
                                   "colorHistory": [],
                                   "hadBye": false
                             },
-                            "result": null
+                            "result": "1-0"
                       },
                       {
                             "round": 1,
@@ -461,23 +461,23 @@
                                   "hadBye": false
                             },
                             "black": {
-                                  "name": "Alireza Firouzja",
-                                  "elo": 2763,
-                                  "id": 6,
+                                  "name": "Magnus Carlsen",
+                                  "elo": 2830,
+                                  "id": 1,
                                   "score": 0,
                                   "opponents": [],
                                   "colorHistory": [],
                                   "hadBye": false
                             },
-                            "result": null
+                            "result": "1/2-1/2"
                       },
                       {
                             "round": 1,
                             "table": 3,
                             "white": {
-                                  "name": "Hikaru Nakamura",
-                                  "elo": 2794,
-                                  "id": 3,
+                                  "name": "Ian Nepomniachtchi",
+                                  "elo": 2770,
+                                  "id": 5,
                                   "score": 0,
                                   "opponents": [],
                                   "colorHistory": [],
@@ -492,7 +492,7 @@
                                   "colorHistory": [],
                                   "hadBye": false
                             },
-                            "result": null
+                            "result": "1-0"
                       },
                       {
                             "round": 1,
@@ -515,7 +515,7 @@
                                   "colorHistory": [],
                                   "hadBye": false
                             },
-                            "result": null
+                            "result": "1-0"
                       }
                 ]
           ],
@@ -523,7 +523,7 @@
           "totalRounds": 3,
           "organizerKey": "roshavi4ak",
           "created": "2025-11-13T06:08:30.165Z",
-          "lastUpdated": "2025-11-13T06:08:36.046Z",
+          "lastUpdated": "2025-11-13T06:13:37.317Z",
           "id": "2"
     }
   }
