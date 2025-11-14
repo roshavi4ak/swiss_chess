@@ -75,9 +75,42 @@ export interface Translations {
   cancel: string;
   confirm: string;
   print: string;
+  vs: string;
+  whiteShort: string;
+  blackShort: string;
   
   // Error messages
   nameError: string;
   eloError: string;
+  ageError: string;
+  numberError: string;
+  sexError: string;
   validationError: string;
+  
+  // Player details
+  age: string;
+  playerNumber: string;
+  sex: string;
+  male: string;
+  female: string;
+  addAgeGroup: string;
+  removeAgeGroup: string;
+  ageGroupName: string;
+  ageGroupRange: string;
+  ageGroupMin: string;
+  ageGroupMax: string;
+  editTournament: string;
+  deletePlayer: string;
+  
+  // Filter buttons
+  all: string;
+  filterByAgeGroup: string;
+  
+  // Player history modal
+  playerHistory: string;
+  matchHistory: string;
+  playerRound: string;
+  opponent: string;
+  matchResult: string;
+  matchBye: string;
 }

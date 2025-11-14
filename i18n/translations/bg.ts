@@ -78,9 +78,42 @@ export const bulgarianTranslations: Translations = {
   cancel: 'Отказ',
   confirm: 'Потвърди',
   print: 'Печат',
+  vs: 'срещу',
+  whiteShort: 'б',
+  blackShort: 'ч',
   
   // Error messages
   nameError: 'Името на играча не може да бъде празно.',
   eloError: 'ELO трябва да бъде между 100 и 3000.',
-  validationError: 'Моля, поправете грешките преди стартиране на турнира.'
+  ageError: 'Възрастта трябва да бъде между 5 и 100.',
+  numberError: 'Номерът на играча е задължителен.',
+  sexError: 'Моля, изберете пол.',
+  validationError: 'Моля, поправете грешките преди стартиране на турнира.',
+  
+  // Player details
+  age: 'Възраст',
+  playerNumber: 'Номер',
+  sex: 'Пол',
+  male: 'М',
+  female: 'Ж',
+  addAgeGroup: 'Добави възрастова група',
+  removeAgeGroup: 'Премахни',
+  ageGroupName: 'Име на групата',
+  ageGroupRange: 'Възрастов диапазон',
+  ageGroupMin: 'Мин. възраст',
+  ageGroupMax: 'Макс. възраст',
+  editTournament: 'Редактирай турнир',
+  deletePlayer: 'Изтрий играч',
+  
+  // Filter buttons
+  all: 'Всички',
+  filterByAgeGroup: 'Филтрирай по възрастова група',
+  
+  // Player history modal
+  playerHistory: 'История на играча',
+  matchHistory: 'История на мачовете',
+  playerRound: 'Кръг',
+  opponent: 'Противник',
+  matchResult: 'Резултат',
+  matchBye: 'БАЙ'
 };

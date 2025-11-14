@@ -7,6 +7,16 @@ export interface Player {
   opponents: number[];
   colorHistory: ('white' | 'black')[];
   hadBye: boolean;
+  age: number;
+  playerNumber: number;
+  sex: 'Ж' | 'М';
+}
+
+export interface AgeGroup {
+  id: number;
+  name: string;
+  minAge: number;
+  maxAge: number;
 }
 
 export type Result = '1-0' | '0-1' | '1/2-1/2' | 'BYE' | null;

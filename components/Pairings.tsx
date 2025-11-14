@@ -65,23 +65,20 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
                     <div className={`text-left ${isOrganizer ? 'cursor-pointer hover:bg-gray-600 p-2 rounded-md transition-colors' : ''}`}
                          onClick={isOrganizer ? () => onPlayerSelectForSwap(pairing.white.id, pairing.table) : undefined}>
-                      <div className={`font-semibold text-sm sm:text-base ${isWhiteSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
-                        {pairing.white.name}
+                      <div className={`font-semibold text-lg sm:text-xl ${isWhiteSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
+                        № {pairing.white.playerNumber} {pairing.white.name}
                       </div>
                       <div className={`text-xs ${isWhiteSelected ? 'text-yellow-200' : 'text-gray-400'}`}>
                         ({pairing.white.elo})
                       </div>
                     </div>
                     <div className="font-bold text-yellow-400 text-center text-sm">
-                      vs
+                      {t.vs}
                     </div>
                     <div className={`text-right ${isOrganizer ? 'cursor-pointer hover:bg-gray-600 p-2 rounded-md transition-colors' : ''}`}
                          onClick={isOrganizer ? () => onPlayerSelectForSwap(pairing.black.id, pairing.table) : undefined}>
-                      <div className={`font-semibold text-sm sm:text-base ${isBlackSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
-                        {pairing.black.name}
-                      </div>
-                      <div className={`text-xs ${isBlackSelected ? 'text-yellow-200' : 'text-gray-400'}`}>
-                        ({pairing.black.elo})
+                      <div className={`font-semibold text-lg sm:text-xl ${isBlackSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
+                        № {pairing.black.playerNumber} {pairing.black.name}
                       </div>
                     </div>
                   </div>
@@ -131,18 +128,59 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                 </>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-                    <div className="text-left">
-                        <div className="font-semibold text-white text-sm sm:text-base">{pairing.white.name}</div>
-                        <div className="text-gray-400 text-xs">({pairing.white.elo})</div>
-                    </div>
-                    <div className="bg-green-600 text-white font-bold py-1 px-3 rounded-full text-xs self-center">
-                        BYE
-                    </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-white text-lg sm:text-xl">№ {pairing.white.playerNumber} {pairing.white.name}</div>
+                  </div>
+                  <div className="bg-green-600 text-white font-bold py-1 px-3 rounded-full text-xs self-center">
+                    BYE
+                  </div>
                 </div>
               )}
             </div>
           );
         })}
+        
+        {/* Bulgarian alphabetical player list - only shown in print */}
+        <div className="print-only mt-6 pt-6 border-t-2 border-gray-600">
+          <h3 className="text-lg font-bold text-black mb-4">Players List</h3>
+          <div className="space-y-2">
+            {(() => {
+              const allPlayers: Array<{id: number, name: string, playerNumber: number, table: number, color: 'w' | 'b'}> = [];
+              
+              pairings.forEach(pairing => {
+                if (pairing.black) {
+                  allPlayers.push(
+                    {...pairing.white, table: pairing.table, color: 'w' as const},
+                    {...pairing.black, table: pairing.table, color: 'b' as const}
+                  );
+                } else {
+                  allPlayers.push({...pairing.white, table: pairing.table, color: 'w' as const});
+                }
+              });
+              
+              const sortedPlayers = allPlayers
+                .map(player => ({
+                  ...player,
+                  firstName: player.name.trim().split(/\s+/)[0] || player.name
+                }))
+                .sort((a, b) => a.firstName.localeCompare(b.firstName, 'bg'));
+              
+              return sortedPlayers.map(player => {
+                const colorText = player.color === 'w' ? 'белите' : 'черните';
+                return (
+                  <div key={`${player.id}-${player.table}`} className="text-lg sm:text-xl text-black">
+                    {(() => {
+                      const isBye = player.color === 'w' && pairings.find(p => p.table === player.table)?.black === null;
+                      return isBye 
+                        ? `${player.name} (номер ${player.playerNumber}) не играе в този кръг и печели служебно 1 точка.`
+                        : `${player.name} (номер ${player.playerNumber}) играе на маса ${player.table} с ${colorText} фигури`;
+                    })()}
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
       </div>
     </div>
   );

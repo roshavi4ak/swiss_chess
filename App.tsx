@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Player, Pairing, TournamentStatus, Result } from './types';
+import { Player, Pairing, TournamentStatus, Result, AgeGroup } from './types';
 import PlayerSetup from './components/PlayerSetup';
 import Leaderboard from './components/Leaderboard';
 import Pairings from './components/Pairings';
@@ -8,6 +8,7 @@ import { ChessKingIcon } from './components/Icon';
 import ShareControl from './components/ShareControl';
 import History from './components/History';
 import SwapConfirmationDialog from './components/SwapConfirmationDialog';
+import PlayerHistoryModal from './components/PlayerHistoryModal';
 import LanguageSwitcher from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
 import { DataSync } from './services/api';
@@ -30,12 +31,13 @@ const App: React.FC = () => {
   const { t } = useI18n();
   const [status, setStatus] = useState<TournamentStatus>('SETUP');
   const [players, setPlayers] = useState<Player[]>([]);
+  const [ageGroups, setAgeGroups] = useState<AgeGroup[]>([]);
   const [pairingsHistory, setPairingsHistory] = useState<Pairing[][]>([]);
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [totalRounds, setTotalRounds] = useState<number>(0);
   const [organizerKey, setOrganizerKey] = useState<string | null>(null);
   const [role, setRole] = useState<'ORGANIZER' | 'OBSERVER'>('OBSERVER');
-  const [view, setView] = useState<'TOURNAMENT' | 'HISTORY'>('TOURNAMENT');
+  const [view, setView] = useState<'TOURNAMENT' | 'HISTORY' | 'EDIT'>('TOURNAMENT');
   const [swapSelection, setSwapSelection] = useState<{ playerId: number; table: number } | null>(null);
   const [isObserving, setIsObserving] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'IDLE' | 'SAVED'>('IDLE');
@@ -43,6 +45,9 @@ const App: React.FC = () => {
   const [showPasswordPrompt, setShowPasswordPrompt] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedAgeGroupFilter, setSelectedAgeGroupFilter] = useState<number | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [showPlayerHistory, setShowPlayerHistory] = useState<boolean>(false);
 
 
   // Extract tournament ID from URL path
@@ -58,6 +63,7 @@ const App: React.FC = () => {
       const stateToSave = {
         status,
         players,
+        ageGroups,
         pairingsHistory,
         currentRound,
         totalRounds,
@@ -71,7 +77,7 @@ const App: React.FC = () => {
       return true;
     }
     return false;
-  }, [status, players, pairingsHistory, currentRound, totalRounds, organizerKey, role]);
+  }, [status, players, ageGroups, pairingsHistory, currentRound, totalRounds, organizerKey, role]);
 
   // Load state from localStorage on initial component mount
   useEffect(() => {
@@ -99,6 +105,7 @@ const App: React.FC = () => {
             }
 
             setPlayers(savedState.players);
+            setAgeGroups(savedState.ageGroups || []);
             setPairingsHistory(savedState.pairingsHistory);
             setCurrentRound(savedState.currentRound);
             setTotalRounds(savedState.totalRounds);
@@ -127,6 +134,7 @@ const App: React.FC = () => {
               }
 
               setPlayers(savedState.players);
+              setAgeGroups(savedState.ageGroups || []);
               setPairingsHistory(savedState.pairingsHistory);
               setCurrentRound(savedState.currentRound);
               setTotalRounds(savedState.totalRounds);
@@ -234,11 +242,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartTournament = async (initialPlayers: Player[], rounds: number) => {
+  const handleStartTournament = async (initialPlayers: Player[], rounds: number, tournamentAgeGroups: AgeGroup[]) => {
     // Use DataSync to create a new tournament with proper ID management
     const newTournamentId = await DataSync.createNewTournament({
       status: 'IN_PROGRESS',
       players: initialPlayers,
+      ageGroups: tournamentAgeGroups,
       pairingsHistory: [],
       currentRound: 1,
       totalRounds: rounds,
@@ -254,6 +263,7 @@ const App: React.FC = () => {
     setRole('ORGANIZER');
 
     setPlayers(initialPlayers);
+    setAgeGroups(tournamentAgeGroups);
     setTotalRounds(rounds);
     setPairingsHistory([round1Pairings]);
     setCurrentRound(1);
@@ -285,7 +295,9 @@ const App: React.FC = () => {
       setSwapSelection(null);
       setIsObserving(false);
       setPendingSwap(null);
-
+      setSelectedAgeGroupFilter(null);
+      setSelectedPlayer(null);
+      setShowPlayerHistory(false);
 
       // Clear the URL hash to remove the organizer key from the URL.
       // This prevents re-entering organizer mode on refresh.
@@ -414,6 +426,16 @@ const App: React.FC = () => {
     setPendingSwap(null);
   };
 
+  const handlePlayerClick = (player: Player) => {
+    setSelectedPlayer(player);
+    setShowPlayerHistory(true);
+  };
+
+  const handleClosePlayerHistory = () => {
+    setShowPlayerHistory(false);
+    setSelectedPlayer(null);
+  };
+
   const handleColorFlip = (table: number) => {
     if (role !== 'ORGANIZER' || isObserving || status !== 'IN_PROGRESS') return;
 
@@ -493,7 +515,7 @@ const App: React.FC = () => {
     if (status === 'COMPLETED') {
       return players.map(p => ({
         ...p,
-        fullColorHistory: p.colorHistory.map(c => c === 'white' ? 'W' : 'B')
+        fullColorHistory: p.colorHistory.map(c => c === 'white' ? t.whiteShort : t.blackShort)
       }));
     }
 
@@ -535,16 +557,16 @@ const App: React.FC = () => {
       }
     }
     
-    return players.map(player => {
+    let filteredPlayers = players.map(player => {
       const liveScore = liveScores.get(player.id) ?? player.score;
       
-      let currentColor: 'W' | 'B' | null = null;
+      let currentColor: string | null = null;
       const pairingForPlayer = currentPairings.find(p => p.white.id === player.id || (p.black && p.black.id === player.id));
       if (pairingForPlayer) {
-        currentColor = pairingForPlayer.white.id === player.id ? 'W' : 'B';
+        currentColor = pairingForPlayer.white.id === player.id ? t.whiteShort : t.blackShort;
       }
 
-      const historicalColors = player.colorHistory.map(c => c === 'white' ? 'W' : 'B');
+      const historicalColors = player.colorHistory.map(c => c === 'white' ? t.whiteShort : t.blackShort);
       const fullColorHistory = currentColor ? [...historicalColors, currentColor] : historicalColors;
 
       return {
@@ -553,7 +575,19 @@ const App: React.FC = () => {
         fullColorHistory,
       };
     });
-  }, [players, currentPairings, status]);
+
+    // Apply age group filter
+    if (selectedAgeGroupFilter !== null) {
+      const ageGroup = ageGroups.find(ag => ag.id === selectedAgeGroupFilter);
+      if (ageGroup) {
+        filteredPlayers = filteredPlayers.filter(player =>
+          player.age >= ageGroup.minAge && player.age <= ageGroup.maxAge
+        );
+      }
+    }
+    
+    return filteredPlayers;
+  }, [players, currentPairings, status, ageGroups, selectedAgeGroupFilter]);
 
   const handlePrint = (sectionId: string) => {
     const printSection = document.getElementById(sectionId);
@@ -954,6 +988,27 @@ const App: React.FC = () => {
     return <History pairingsHistory={pairingsHistory} onClose={() => setView('TOURNAMENT')} />
   }
 
+  if (view === 'EDIT') {
+    return (
+      <PlayerSetup 
+        onStart={(updatedPlayers, updatedRounds, updatedAgeGroups) => {
+          const round1Pairings = generateRound1Pairings(updatedPlayers);
+          setPlayers(updatedPlayers);
+          setAgeGroups(updatedAgeGroups);
+          setTotalRounds(updatedRounds);
+          setPairingsHistory([round1Pairings]);
+          setCurrentRound(1);
+          setStatus('IN_PROGRESS');
+          setView('TOURNAMENT');
+        }} 
+        initialPlayers={players}
+        initialAgeGroups={ageGroups}
+        initialRounds={totalRounds}
+        isEditing={true}
+      />
+    );
+  }
+
   const isOrganizerView = role === 'ORGANIZER' && !isObserving;
 
   return (
@@ -1001,7 +1056,15 @@ const App: React.FC = () => {
             />
           </div>
           <div id="leaderboard-section" className="order-2 lg:order-2 lg:col-span-1">
-            <Leaderboard players={livePlayers} onPrint={() => handlePrint('leaderboard-section')} isOrganizer={isOrganizerView} />
+            <Leaderboard
+              players={livePlayers}
+              onPrint={() => handlePrint('leaderboard-section')}
+              isOrganizer={isOrganizerView}
+              ageGroups={ageGroups}
+              selectedAgeGroupFilter={selectedAgeGroupFilter}
+              onAgeGroupFilterChange={setSelectedAgeGroupFilter}
+              onPlayerClick={handlePlayerClick}
+            />
           </div>
         </div>
 
@@ -1019,12 +1082,20 @@ const App: React.FC = () => {
             <p className="text-2xl font-bold text-green-400">{t.tournamentFinished}</p>
           )}
           {isOrganizerView && (
-            <button
-              onClick={handleManualSave}
-              className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-            >
-              {saveStatus === 'SAVED' ? t.saved : t.saveTournament}
-            </button>
+            <>
+              <button
+                onClick={handleManualSave}
+                className="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+              >
+                {saveStatus === 'SAVED' ? t.saved : t.saveTournament}
+              </button>
+              <button
+                onClick={() => setView('EDIT')}
+                className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+              >
+                {t.editTournament}
+              </button>
+            </>
           )}
           <button
             onClick={() => setView('HISTORY')}
@@ -1059,11 +1130,17 @@ const App: React.FC = () => {
             </>
         )}
       </div>
-      <SwapConfirmationDialog 
+      <SwapConfirmationDialog
         isOpen={!!pendingSwap}
         onConfirm={handleConfirmSwap}
         onCancel={handleCancelSwap}
         swapDetails={pendingSwap}
+      />
+      <PlayerHistoryModal
+        player={selectedPlayer}
+        pairingsHistory={pairingsHistory}
+        isOpen={showPlayerHistory}
+        onClose={handleClosePlayerHistory}
       />
     </div>
   );

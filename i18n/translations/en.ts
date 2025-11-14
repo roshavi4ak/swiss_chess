@@ -78,9 +78,42 @@ export const englishTranslations: Translations = {
   cancel: 'Cancel',
   confirm: 'Confirm',
   print: 'Print',
+  vs: 'vs',
+  whiteShort: 'W',
+  blackShort: 'B',
   
   // Error messages
   nameError: 'Player name cannot be empty.',
   eloError: 'ELO must be between 100 and 3000.',
-  validationError: 'Please fix the errors before starting the tournament.'
+  ageError: 'Age must be between 5 and 100.',
+  numberError: 'Player number is required.',
+  sexError: 'Please select sex.',
+  validationError: 'Please fix the errors before starting the tournament.',
+  
+  // Player details
+  age: 'Age',
+  playerNumber: 'Number',
+  sex: 'Sex',
+  male: 'М',
+  female: 'Ж',
+  addAgeGroup: 'Add Age Group',
+  removeAgeGroup: 'Remove',
+  ageGroupName: 'Group Name',
+  ageGroupRange: 'Age Range',
+  ageGroupMin: 'Min Age',
+  ageGroupMax: 'Max Age',
+  editTournament: 'Edit Tournament',
+  deletePlayer: 'Delete Player',
+  
+  // Filter buttons
+  all: 'All',
+  filterByAgeGroup: 'Filter by Age Group',
+  
+  // Player history modal
+  playerHistory: 'Player History',
+  matchHistory: 'Match History',
+  playerRound: 'Round',
+  opponent: 'Opponent',
+  matchResult: 'Result',
+  matchBye: 'BYE'
 };
