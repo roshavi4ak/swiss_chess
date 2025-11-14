@@ -24,6 +24,10 @@ export const bulgarianTranslations: Translations = {
   
   // Player Setup
   enterPlayerDetails: 'Въведете данни за играчите и конфигурирайте турнира.',
+  tournamentId: 'ID на турнира',
+  tournamentIdPlaceholder: 'напр., deca, шампиони-2024, мой-турнир',
+  tournamentIdError: 'ID-то на турнира трябва да бъде между 3-50 символа, съдържайки само букви, числа, тирета и долничерти.',
+  tournamentIdRequired: 'ID-то на турнира е задължително.',
   playerName: 'Име на играч',
   playerNameCannotBeEmpty: 'Името на играча не може да бъде празно.',
   

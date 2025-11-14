@@ -22,6 +22,10 @@ export interface Translations {
   
   // Player Setup
   enterPlayerDetails: string;
+  tournamentId: string;
+  tournamentIdPlaceholder: string;
+  tournamentIdError: string;
+  tournamentIdRequired: string;
   playerName: string;
   playerNameCannotBeEmpty: string;
   // ELO label (for player setup)

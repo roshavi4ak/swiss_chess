@@ -24,6 +24,10 @@ export const englishTranslations: Translations = {
   
   // Player Setup
   enterPlayerDetails: 'Enter player details and configure the tournament.',
+  tournamentId: 'Tournament ID',
+  tournamentIdPlaceholder: 'e.g., deca, champions-2024, my-tournament',
+  tournamentIdError: 'Tournament ID must be 3-50 characters, containing only letters, numbers, hyphens, and underscores.',
+  tournamentIdRequired: 'Tournament ID is required.',
   playerName: 'Player Name',
   playerNameCannotBeEmpty: 'Player name cannot be empty.',
   

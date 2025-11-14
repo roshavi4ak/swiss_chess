@@ -243,9 +243,35 @@ const App: React.FC = () => {
     }
   };
 
-  const handleStartTournament = async (initialPlayers: Player[], rounds: number, tournamentAgeGroups: AgeGroup[]) => {
-    // Use DataSync to create a new tournament with proper ID management
-    const newTournamentId = await DataSync.createNewTournament({
+  const handleStartTournament = async (initialPlayers: Player[], rounds: number, tournamentAgeGroups: AgeGroup[], customTournamentId?: string) => {
+    // Use custom tournament ID if provided, otherwise create new one
+    let newTournamentId: string;
+    
+    if (customTournamentId && customTournamentId.trim()) {
+      // Check if tournament with this ID already exists
+      const existingData = await DataSync.loadTournamentData(customTournamentId.trim());
+      if (existingData) {
+        alert(`Tournament ID "${customTournamentId}" already exists. Please choose a different ID.`);
+        return;
+      }
+      newTournamentId = customTournamentId.trim();
+    } else {
+      // Generate new ID automatically
+      newTournamentId = await DataSync.createNewTournament({
+        status: 'IN_PROGRESS',
+        players: initialPlayers,
+        ageGroups: tournamentAgeGroups,
+        pairingsHistory: [],
+        currentRound: 1,
+        totalRounds: rounds,
+        organizerKey: 'roshavi4ak',
+        created: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+      });
+    }
+
+    // Save tournament data with the chosen ID
+    const tournamentData = {
       status: 'IN_PROGRESS',
       players: initialPlayers,
       ageGroups: tournamentAgeGroups,
@@ -255,7 +281,9 @@ const App: React.FC = () => {
       organizerKey: 'roshavi4ak',
       created: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
-    });
+    };
+
+    await DataSync.saveTournamentData(newTournamentId, tournamentData);
 
     const newKey = 'roshavi4ak'; // Fixed organizer key
     const round1Pairings = generateRound1Pairings(initialPlayers);

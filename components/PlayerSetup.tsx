@@ -5,7 +5,7 @@ import { useI18n } from '../i18n/I18nContext';
 import TournamentList from './TournamentList';
 
 interface PlayerSetupProps {
-  onStart: (players: Player[], rounds: number, ageGroups: AgeGroup[]) => void;
+  onStart: (players: Player[], rounds: number, ageGroups: AgeGroup[], tournamentId?: string) => void;
   initialPlayers?: Omit<Player, 'id' | 'score' | 'opponents' | 'colorHistory' | 'hadBye'>[];
   initialAgeGroups?: Omit<AgeGroup, 'id'>[];
   initialRounds?: number;
@@ -58,6 +58,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({
   const [rounds, setRounds] = useState(() => 
     initialRounds || calculateRecommendedRounds((initialPlayers || defaultPlayers).length)
   );
+  const [tournamentId, setTournamentId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -116,6 +117,17 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({
 
   const validateInputs = (): boolean => {
     const newErrors: Record<string, string> = {};
+    
+    // Validate tournament ID (only when not editing)
+    if (!isEditing) {
+      if (!tournamentId.trim()) {
+        newErrors['tournamentId'] = t.tournamentIdRequired;
+      } else if (!/^[a-zA-Z0-9_-]{3,50}$/.test(tournamentId.trim())) {
+        newErrors['tournamentId'] = t.tournamentIdError;
+      }
+    }
+
+    // Validate players
     players.forEach((player, index) => {
         if (!player.name.trim()) {
             newErrors[`name-${index}`] = t.nameError;
@@ -151,7 +163,7 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({
       colorHistory: [],
       hadBye: false,
     }));
-    onStart(initialPlayers, rounds, ageGroups);
+    onStart(initialPlayers, rounds, ageGroups, isEditing ? undefined : tournamentId.trim());
   };
 
   const handleTournamentSelect = (tournamentId: string) => {
@@ -194,6 +206,39 @@ const PlayerSetup: React.FC<PlayerSetupProps> = ({
           <p className="text-gray-400 mt-2">
             {isEditing ? 'Edit player details and age groups' : t.enterPlayerDetails}
           </p>
+          
+          {/* Tournament ID field - only show if not editing */}
+          {!isEditing && (
+            <div className="mt-4 max-w-md mx-auto">
+              <label htmlFor="tournamentId" className="block text-sm font-medium text-gray-300 mb-1">
+                {t.tournamentId}
+              </label>
+              <input
+                type="text"
+                id="tournamentId"
+                value={tournamentId}
+                onChange={(e) => {
+                  setTournamentId(e.target.value);
+                  // Clear error on change
+                  if (errors['tournamentId']) {
+                    const newErrors = { ...errors };
+                    delete newErrors['tournamentId'];
+                    setErrors(newErrors);
+                  }
+                }}
+                className={`w-full ${getInputClass(!!errors['tournamentId'])}`}
+                placeholder={t.tournamentIdPlaceholder}
+                aria-invalid={!!errors['tournamentId']}
+                aria-describedby={errors['tournamentId'] ? 'tournamentId-error' : undefined}
+              />
+              {errors['tournamentId'] && (
+                <p id="tournamentId-error" className="text-red-500 text-xs mt-1">{errors['tournamentId']}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Your tournament will be accessible at: {window.location.origin}/<span className="font-mono">{tournamentId || 'your-tournament-id'}</span>
+              </p>
+            </div>
+          )}
           
           {/* Past Tournaments Button - only show if not editing */}
           {!isEditing && (
