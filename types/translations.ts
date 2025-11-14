@@ -67,6 +67,7 @@ export interface Translations {
   scoreShort: string;
   rank: string;
   colorHistory: string;
+  points: string;
   
   // Common
   yes: string;
@@ -105,6 +106,8 @@ export interface Translations {
   // Filter buttons
   all: string;
   filterByAgeGroup: string;
+  filterByWomen: string;
+  filters: string;
   
   // Player history modal
   playerHistory: string;

@@ -11,10 +11,12 @@ interface LeaderboardProps {
   ageGroups: AgeGroup[];
   selectedAgeGroupFilter: number | null;
   onAgeGroupFilterChange: (ageGroupId: number | null) => void;
+  selectedWomenFilter: boolean;
+  onWomenFilterChange: (womenFilter: boolean) => void;
   onPlayerClick: (player: Player) => void;
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer, ageGroups, selectedAgeGroupFilter, onAgeGroupFilterChange, onPlayerClick }) => {
+const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer, ageGroups, selectedAgeGroupFilter, onAgeGroupFilterChange, selectedWomenFilter, onWomenFilterChange, onPlayerClick }) => {
   const { t } = useI18n();
   
   const sortedPlayers = [...players].sort((a, b) => {
@@ -42,36 +44,58 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
       </div>
 
       {/* Filter Buttons */}
-      {ageGroups.length > 0 && (
-        <div className="mb-4">
-          <div className="text-sm text-gray-300 mb-2">{t.filterByAgeGroup}:</div>
-          <div className="flex flex-wrap gap-2">
+      <div className="mb-4">
+        <div className="text-sm text-gray-300 mb-2">{t.filters}:</div>
+        <div className="flex flex-wrap gap-2">
+          {/* All Filter */}
+          <button
+            onClick={() => {
+              onAgeGroupFilterChange(null);
+              onWomenFilterChange(false);
+            }}
+            className={`px-3 py-1 text-sm rounded-lg transition duration-300 ${
+              selectedAgeGroupFilter === null && !selectedWomenFilter
+                ? 'bg-yellow-500 text-gray-900 font-bold'
+                : 'bg-gray-600 hover:bg-gray-500 text-white'
+            }`}
+          >
+            {t.all}
+          </button>
+          
+          {/* Age Group Filters */}
+          {ageGroups.length > 0 && ageGroups.map((ageGroup) => (
             <button
-              onClick={() => onAgeGroupFilterChange(null)}
+              key={ageGroup.id}
+              onClick={() => {
+                onAgeGroupFilterChange(ageGroup.id);
+                onWomenFilterChange(false);
+              }}
               className={`px-3 py-1 text-sm rounded-lg transition duration-300 ${
-                selectedAgeGroupFilter === null
+                selectedAgeGroupFilter === ageGroup.id && !selectedWomenFilter
                   ? 'bg-yellow-500 text-gray-900 font-bold'
                   : 'bg-gray-600 hover:bg-gray-500 text-white'
               }`}
             >
-              {t.all}
+              {ageGroup.name}
             </button>
-            {ageGroups.map((ageGroup) => (
-              <button
-                key={ageGroup.id}
-                onClick={() => onAgeGroupFilterChange(ageGroup.id)}
-                className={`px-3 py-1 text-sm rounded-lg transition duration-300 ${
-                  selectedAgeGroupFilter === ageGroup.id
-                    ? 'bg-yellow-500 text-gray-900 font-bold'
-                    : 'bg-gray-600 hover:bg-gray-500 text-white'
-                }`}
-              >
-                {ageGroup.name}
-              </button>
-            ))}
-          </div>
+          ))}
+          
+          {/* Women Filter */}
+          <button
+            onClick={() => {
+              onWomenFilterChange(true);
+              onAgeGroupFilterChange(null);
+            }}
+            className={`px-3 py-1 text-sm rounded-lg transition duration-300 ${
+              selectedWomenFilter
+                ? 'bg-yellow-500 text-gray-900 font-bold'
+                : 'bg-gray-600 hover:bg-gray-500 text-white'
+            }`}
+          >
+            {t.female}
+          </button>
         </div>
-      )}
+      </div>
       
       {/* Mobile Card Layout */}
       <div className="block sm:hidden">
@@ -111,7 +135,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
         <table className="w-full text-left">
           <thead className="border-b border-gray-600">
             <tr>
-              <th className="p-3 font-bold text-yellow-400">#{t.rank}</th>
+              <th className="p-3 font-bold text-yellow-400">{t.rank}</th>
               <th className="p-3 font-bold text-yellow-400">{t.player}</th>
               <th className="p-3 text-center font-bold text-yellow-400 hidden md:table-cell">{t.colorHistory}</th>
               <th className="p-3 text-right font-bold text-yellow-400">{t.score}</th>

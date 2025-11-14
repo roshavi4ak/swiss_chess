@@ -142,7 +142,7 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
         
         {/* Bulgarian alphabetical player list - only shown in print */}
         <div className="print-only mt-6 pt-6 border-t-2 border-gray-600">
-          <h3 className="text-lg font-bold text-black mb-4">Players List</h3>
+          <h3 className="text-lg font-bold text-black mb-4">Списък</h3>
           <div className="space-y-2">
             {(() => {
               const allPlayers: Array<{id: number, name: string, playerNumber: number, table: number, color: 'w' | 'b'}> = [];

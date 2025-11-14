@@ -67,7 +67,8 @@ export const bulgarianTranslations: Translations = {
   player: 'Играч',
   score: 'Точки',
   scoreShort: 'Тчк',
-  rank: '№',
+  rank: 'Поз.',
+  points: 'Точки',
   
   colorHistory: 'Цветове',
   
@@ -108,6 +109,8 @@ export const bulgarianTranslations: Translations = {
   // Filter buttons
   all: 'Всички',
   filterByAgeGroup: 'Филтрирай по възрастова група',
+  filterByWomen: 'Филтрирай по жени',
+  filters: 'Филтри',
   
   // Player history modal
   playerHistory: 'История на играча',

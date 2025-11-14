@@ -67,7 +67,8 @@ export const englishTranslations: Translations = {
   player: 'Player',
   score: 'Score',
   scoreShort: 'Pts',
-  rank: '#',
+  rank: 'Pos.',
+  points: 'Points',
   
   colorHistory: 'Colors',
   
@@ -108,6 +109,8 @@ export const englishTranslations: Translations = {
   // Filter buttons
   all: 'All',
   filterByAgeGroup: 'Filter by Age Group',
+  filterByWomen: 'Filter by Women',
+  filters: 'Filters',
   
   // Player history modal
   playerHistory: 'Player History',

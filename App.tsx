@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedAgeGroupFilter, setSelectedAgeGroupFilter] = useState<number | null>(null);
+  const [selectedWomenFilter, setSelectedWomenFilter] = useState<boolean>(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showPlayerHistory, setShowPlayerHistory] = useState<boolean>(false);
 
@@ -296,6 +297,7 @@ const App: React.FC = () => {
       setIsObserving(false);
       setPendingSwap(null);
       setSelectedAgeGroupFilter(null);
+      setSelectedWomenFilter(false);
       setSelectedPlayer(null);
       setShowPlayerHistory(false);
 
@@ -585,9 +587,14 @@ const App: React.FC = () => {
         );
       }
     }
+
+    // Apply women filter
+    if (selectedWomenFilter) {
+      filteredPlayers = filteredPlayers.filter(player => player.sex === 'Ж');
+    }
     
     return filteredPlayers;
-  }, [players, currentPairings, status, ageGroups, selectedAgeGroupFilter]);
+  }, [players, currentPairings, status, ageGroups, selectedAgeGroupFilter, selectedWomenFilter]);
 
   const handlePrint = (sectionId: string) => {
     const printSection = document.getElementById(sectionId);
@@ -1063,6 +1070,8 @@ const App: React.FC = () => {
               ageGroups={ageGroups}
               selectedAgeGroupFilter={selectedAgeGroupFilter}
               onAgeGroupFilterChange={setSelectedAgeGroupFilter}
+              selectedWomenFilter={selectedWomenFilter}
+              onWomenFilterChange={setSelectedWomenFilter}
               onPlayerClick={handlePlayerClick}
             />
           </div>

@@ -102,7 +102,7 @@ const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
             <div>
               <h2 className="text-xl font-bold text-yellow-400">{t.playerHistory}</h2>
               <p className="text-white font-medium">{player.name}</p>
-              <p className="text-gray-300 text-sm">ELO: {player.elo} | Age: {player.age}</p>
+              <p className="text-gray-300 text-sm">ELO: {player.elo} | {t.age}: {player.age}</p>
             </div>
             <button
               onClick={onClose}
