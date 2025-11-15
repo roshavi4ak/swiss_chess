@@ -1,0 +1,13 @@
+{
+  "id": "deca",
+  "status": "IN_PROGRESS",
+  "players": [
+    {"id": 1, "name": "Alice", "elo": 1500, "age": 25, "sex": "Ж"},
+    {"id": 2, "name": "Bob", "elo": 1600, "age": 30, "sex": "М"}
+  ],
+  "ageGroups": [],
+  "pairingsHistory": [],
+  "currentRound": 1,
+  "totalRounds": 3,
+  "organizerKey": "roshavi4ak"
+}

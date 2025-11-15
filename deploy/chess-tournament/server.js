@@ -69,14 +69,23 @@ app.post('/api/tournaments', (req, res) => {
 // Update tournament
 app.put('/api/tournaments/:id', (req, res) => {
   try {
-    const tournament = db.updateTournament(req.params.id, req.body);
-    res.json({ success: true, data: tournament });
-  } catch (error) {
-    if (error.message.includes('not found')) {
-      res.status(404).json({ success: false, error: error.message });
+    let tournament = db.getTournament(req.params.id);
+    
+    // If tournament doesn't exist, create it
+    if (!tournament) {
+      const tournamentData = {
+        ...req.body,
+        id: req.params.id
+      };
+      tournament = db.createTournament(tournamentData);
+      return res.status(201).json({ success: true, data: tournament });
     } else {
-      res.status(400).json({ success: false, error: error.message });
+      // If tournament exists, update it
+      tournament = db.updateTournament(req.params.id, req.body);
+      return res.json({ success: true, data: tournament });
     }
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 

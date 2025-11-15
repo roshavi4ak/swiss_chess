@@ -9,6 +9,7 @@ import ShareControl from './components/ShareControl';
 import History from './components/History';
 import SwapConfirmationDialog from './components/SwapConfirmationDialog';
 import PlayerHistoryModal from './components/PlayerHistoryModal';
+import PlayerSelectionDialog from './components/PlayerSelectionDialog';
 import LanguageSwitcher from './i18n/LanguageSwitcher';
 import { useI18n } from './i18n/I18nContext';
 import { DataSync } from './services/api';
@@ -49,12 +50,13 @@ const App: React.FC = () => {
   const [selectedWomenFilter, setSelectedWomenFilter] = useState<boolean>(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showPlayerHistory, setShowPlayerHistory] = useState<boolean>(false);
+  const [showPlayerSelection, setShowPlayerSelection] = useState<boolean>(false);
 
 
   // Extract tournament ID from URL path
   const getTournamentId = () => {
     const path = window.location.pathname;
-    const match = path.match(/\/(\d+)/);
+    const match = path.match(/\/([a-zA-Z0-9]+)/);
     return match ? match[1] : null;
   };
   // Logic to save state, extracted to be reusable
@@ -324,6 +326,7 @@ const App: React.FC = () => {
       setSwapSelection(null);
       setIsObserving(false);
       setPendingSwap(null);
+      setShowPlayerSelection(false);
       setSelectedAgeGroupFilter(null);
       setSelectedWomenFilter(false);
       setSelectedPlayer(null);
@@ -450,10 +453,62 @@ const App: React.FC = () => {
 
     setPairingsHistory(newPairingsHistory);
     setPendingSwap(null);
+    setSwapSelection(null);
   };
   
   const handleCancelSwap = () => {
     setPendingSwap(null);
+  };
+
+  const handlePickPlayer = (playerId: number, table: number) => {
+    if (role !== 'ORGANIZER' || isObserving || status !== 'IN_PROGRESS') return;
+
+    // Find the selected player
+    const currentRoundPairings = pairingsHistory[currentRound - 1];
+    const pairing = currentRoundPairings.find(p => p.table === table);
+    if (!pairing) return;
+
+    const selectedPlayer = pairing.white.id === playerId ? pairing.white : pairing.black;
+    if (!selectedPlayer) return;
+
+    setSelectedPlayer(selectedPlayer);
+    setShowPlayerSelection(true);
+  };
+
+  const handlePlayerSelectionConfirm = (targetPlayer: Player) => {
+    if (!selectedPlayer) return;
+
+    // Find the table of the target player
+    const currentRoundPairings = pairingsHistory[currentRound - 1];
+    const targetPairing = currentRoundPairings.find(p =>
+      p.white.id === targetPlayer.id || (p.black && p.black.id === targetPlayer.id)
+    );
+
+    if (!targetPairing) {
+      console.error('Could not find pairing for target player');
+      return;
+    }
+
+    const targetTable = targetPairing.table;
+
+    // Set up the pending swap
+    setPendingSwap({
+      player1: selectedPlayer,
+      table1: currentRoundPairings.find(p =>
+        p.white.id === selectedPlayer.id || (p.black && p.black.id === selectedPlayer.id)
+      )?.table || 0,
+      player2: targetPlayer,
+      table2: targetTable,
+    });
+
+    // Close the selection dialog
+    setShowPlayerSelection(false);
+    setSelectedPlayer(null);
+  };
+
+  const handlePlayerSelectionCancel = () => {
+    setShowPlayerSelection(false);
+    setSelectedPlayer(null);
   };
 
   const handlePlayerClick = (player: Player) => {
@@ -1087,6 +1142,7 @@ const App: React.FC = () => {
               isOrganizer={isOrganizerView}
               swapSelection={swapSelection}
               onPlayerSelectForSwap={handlePlayerSelectForSwap}
+              onPlayerPickForSwap={handlePickPlayer}
               onPrint={() => handlePrint('pairings-section')}
             />
           </div>
@@ -1172,6 +1228,15 @@ const App: React.FC = () => {
         onConfirm={handleConfirmSwap}
         onCancel={handleCancelSwap}
         swapDetails={pendingSwap}
+      />
+      <PlayerSelectionDialog
+        isOpen={showPlayerSelection}
+        onClose={handlePlayerSelectionCancel}
+        onPlayerSelect={handlePlayerSelectionConfirm}
+        players={players}
+        selectedPlayer={selectedPlayer || undefined}
+        currentPairings={currentPairings}
+        title="Select Player to Swap With"
       />
       <PlayerHistoryModal
         player={selectedPlayer}

@@ -1,0 +1,13 @@
+{
+  "id": "123",
+  "status": "IN_PROGRESS",
+  "players": [
+    {"id": 1, "name": "Charlie", "elo": 1700, "age": 28, "sex": "М"},
+    {"id": 2, "name": "Diana", "elo": 1650, "age": 26, "sex": "Ж"}
+  ],
+  "ageGroups": [],
+  "pairingsHistory": [],
+  "currentRound": 1,
+  "totalRounds": 3,
+  "organizerKey": "roshavi4ak"
+}

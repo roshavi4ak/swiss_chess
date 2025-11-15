@@ -1,1 +1,1 @@
-{"id": "1", "status": "SETUP", "players": [], "pairingsHistory": [], "currentRound": 1, "totalRounds": 5, "organizerKey": "test"}
+{"id":"test999","status":"IN_PROGRESS","players":[{"id":1,"name":"Test Player","age":25,"elo":1200,"sex":"M"}],"pairingsHistory":[],"currentRound":1,"totalRounds":3,"organizerKey":"roshavi4ak","created":"2025-11-14T18:55:00.000Z","lastUpdated":"2025-11-14T18:55:00.000Z"}

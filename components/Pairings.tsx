@@ -10,6 +10,7 @@ interface PairingsProps {
   isOrganizer: boolean;
   swapSelection: { playerId: number; table: number } | null;
   onPlayerSelectForSwap: (playerId: number, table: number) => void;
+  onPlayerPickForSwap: (playerId: number, table: number) => void;
   onPrint: () => void;
 }
 
@@ -28,7 +29,7 @@ const ResultButton: React.FC<{
   );
 };
 
-const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFlip, isOrganizer, swapSelection, onPlayerSelectForSwap, onPrint }) => {
+const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFlip, isOrganizer, swapSelection, onPlayerSelectForSwap, onPlayerPickForSwap, onPrint }) => {
   const { t } = useI18n();
 
   return (
@@ -71,6 +72,17 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                       <div className={`text-xs ${isWhiteSelected ? 'text-yellow-200' : 'text-gray-400'}`}>
                         ({pairing.white.elo})
                       </div>
+                      {isWhiteSelected && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPlayerPickForSwap(pairing.white.id, pairing.table);
+                          }}
+                          className="mt-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-2 rounded transition duration-200"
+                        >
+                          Pick Player
+                        </button>
+                      )}
                     </div>
                     <div className="font-bold text-yellow-400 text-center text-sm">
                       {t.vs}
@@ -80,6 +92,17 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                       <div className={`font-semibold text-lg sm:text-xl ${isBlackSelected ? 'text-yellow-300 bg-yellow-900 px-2 py-1 rounded' : 'text-white'}`}>
                         № {pairing.black.playerNumber} {pairing.black.name}
                       </div>
+                      {isBlackSelected && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPlayerPickForSwap(pairing.black.id, pairing.table);
+                          }}
+                          className="mt-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-2 rounded transition duration-200"
+                        >
+                          Pick Player
+                        </button>
+                      )}
                     </div>
                   </div>
                   {/* Results section - shown for both organizers and observers */}
