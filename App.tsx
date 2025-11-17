@@ -348,16 +348,19 @@ const App: React.FC = () => {
     }
   };
 
-  const handleResultUpdate = (table: number, result: Result) => {
+  const handleResultUpdate = (table: number, result: Result | null, roundNumber?: number) => {
     if (role !== 'ORGANIZER' || isObserving) return;
 
+    const targetRound = roundNumber || currentRound;
+    const roundIndex = targetRound - 1;
+
     const newPairingsHistory = pairingsHistory.map((roundPairings, index) => {
-      // If it's not the current round, return the original array
-      if (index !== currentRound - 1) {
+      // If it's not the target round, return the original array
+      if (index !== roundIndex) {
         return roundPairings;
       }
       
-      // For the current round, create a new array of pairings
+      // For the target round, create a new array of pairings
       return roundPairings.map(pairing => {
         if (pairing.table === table) {
           // If this is the pairing to update, return a new object with the new result
@@ -521,6 +524,51 @@ const App: React.FC = () => {
     setSelectedPlayer(null);
   };
 
+  const handleReopenTournament = () => {
+    if (window.confirm('Are you sure you want to reopen this completed tournament? This will allow you to make changes and continue the tournament.')) {
+      // Recalculate player scores by removing the current round's results
+      // This prevents double-counting when switching from COMPLETED to IN_PROGRESS
+      const currentRoundPairings = pairingsHistory[currentRound - 1];
+      const playerMap = new Map<number, Player>(players.map(p => [p.id, { ...p, opponents: [...p.opponents], colorHistory: [...p.colorHistory] }]));
+
+      // Subtract the current round's results from player scores
+      currentRoundPairings.forEach(pairing => {
+        if (pairing.black === null && pairing.result === 'BYE') {
+          const byePlayer = playerMap.get(pairing.white.id)!;
+          byePlayer.score -= 1;
+          playerMap.set(byePlayer.id, byePlayer);
+        } else if (pairing.black) {
+          const white = playerMap.get(pairing.white.id)!;
+          const black = playerMap.get(pairing.black.id)!;
+
+          if (pairing.result === '1-0') {
+            white.score -= 1;
+          } else if (pairing.result === '0-1') {
+            black.score -= 1;
+          } else if (pairing.result === '1/2-1/2') {
+            white.score -= 0.5;
+            black.score -= 0.5;
+          }
+
+          // Remove the last color from color history
+          if (white.colorHistory.length > 0) white.colorHistory.pop();
+          if (black.colorHistory.length > 0) black.colorHistory.pop();
+
+          // Remove the last opponent
+          if (white.opponents.length > 0) white.opponents.pop();
+          if (black.opponents.length > 0) black.opponents.pop();
+
+          playerMap.set(white.id, white);
+          playerMap.set(black.id, black);
+        }
+      });
+
+      const correctedPlayers = Array.from(playerMap.values());
+      setPlayers(correctedPlayers);
+      setStatus('IN_PROGRESS');
+    }
+  };
+
   const handleColorFlip = (table: number) => {
     if (role !== 'ORGANIZER' || isObserving || status !== 'IN_PROGRESS') return;
 
@@ -598,10 +646,28 @@ const App: React.FC = () => {
 
   const livePlayers: LeaderboardPlayer[] = useMemo(() => {
     if (status === 'COMPLETED') {
-      return players.map(p => ({
+      // For completed tournaments, start with all players and their final scores
+      let filteredPlayers = players.map(p => ({
         ...p,
         fullColorHistory: p.colorHistory.map(c => c === 'white' ? t.whiteShort : t.blackShort)
       }));
+
+      // Apply age group filter
+      if (selectedAgeGroupFilter !== null) {
+        const ageGroup = ageGroups.find(ag => ag.id === selectedAgeGroupFilter);
+        if (ageGroup) {
+          filteredPlayers = filteredPlayers.filter(player =>
+            player.age >= ageGroup.minAge && player.age <= ageGroup.maxAge
+          );
+        }
+      }
+
+      // Apply women filter
+      if (selectedWomenFilter) {
+        filteredPlayers = filteredPlayers.filter(player => player.sex === 'Ж');
+      }
+
+      return filteredPlayers;
     }
 
     if (status !== 'IN_PROGRESS' || !currentPairings.length) {
@@ -1075,7 +1141,7 @@ const App: React.FC = () => {
   }
   
   if (view === 'HISTORY') {
-    return <History pairingsHistory={pairingsHistory} onClose={() => setView('TOURNAMENT')} />
+    return <History pairingsHistory={pairingsHistory} onClose={() => setView('TOURNAMENT')} onResultUpdate={handleResultUpdate} isOrganizer={role === 'ORGANIZER' && !isObserving} />
   }
 
   if (view === 'EDIT') {
@@ -1144,11 +1210,13 @@ const App: React.FC = () => {
               onPlayerSelectForSwap={handlePlayerSelectForSwap}
               onPlayerPickForSwap={handlePickPlayer}
               onPrint={() => handlePrint('pairings-section')}
+              roundNumber={currentRound}
             />
           </div>
           <div id="leaderboard-section" className="order-2 lg:order-2 lg:col-span-1">
             <Leaderboard
               players={livePlayers}
+              allPlayers={players}
               onPrint={() => handlePrint('leaderboard-section')}
               isOrganizer={isOrganizerView}
               ageGroups={ageGroups}
@@ -1172,7 +1240,17 @@ const App: React.FC = () => {
             </button>
           )}
           {status === 'COMPLETED' && (
-            <p className="text-2xl font-bold text-green-400">{t.tournamentFinished}</p>
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-2xl font-bold text-green-400">{t.tournamentFinished}</p>
+              {isOrganizerView && (
+                <button
+                  onClick={handleReopenTournament}
+                  className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                >
+                  Reopen Tournament
+                </button>
+              )}
+            </div>
           )}
           {isOrganizerView && (
             <>

@@ -5,13 +5,14 @@ import { useI18n } from '../i18n/I18nContext';
 
 interface PairingsProps {
   pairings: Pairing[];
-  onResultUpdate: (table: number, result: Result) => void;
+  onResultUpdate: (table: number, result: Result | null, roundNumber?: number) => void;
   onColorFlip: (table: number) => void;
   isOrganizer: boolean;
   swapSelection: { playerId: number; table: number } | null;
   onPlayerSelectForSwap: (playerId: number, table: number) => void;
   onPlayerPickForSwap: (playerId: number, table: number) => void;
   onPrint: () => void;
+  roundNumber?: number;
 }
 
 const ResultButton: React.FC<{
@@ -23,13 +24,13 @@ const ResultButton: React.FC<{
   const selectedClasses = "bg-yellow-500 text-gray-900 scale-110";
   const unselectedClasses = "bg-gray-600 hover:bg-gray-500";
   return (
-    <button onClick={onClick} className={`${baseClasses} ${selected ? selectedClasses : unselectedClasses}`}>
+    <button onClick={onClick} className={`${baseClasses} ${selected ? selectedClasses : unselectedClasses}`} title={selected ? "Click to clear result" : "Click to select result"}>
       {children}
     </button>
   );
 };
 
-const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFlip, isOrganizer, swapSelection, onPlayerSelectForSwap, onPlayerPickForSwap, onPrint }) => {
+const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFlip, isOrganizer, swapSelection, onPlayerSelectForSwap, onPlayerPickForSwap, onPrint, roundNumber }) => {
   const { t } = useI18n();
 
   return (
@@ -109,9 +110,9 @@ const Pairings: React.FC<PairingsProps> = ({ pairings, onResultUpdate, onColorFl
                   <div className="mt-3 pt-3 border-t border-gray-600 no-print">
                     {isOrganizer ? (
                       <div className="flex justify-center items-center gap-1 sm:gap-2">
-                        <ResultButton onClick={() => onResultUpdate(pairing.table, '1-0')} selected={pairing.result === '1-0'}>1-0</ResultButton>
-                        <ResultButton onClick={() => onResultUpdate(pairing.table, '1/2-1/2')} selected={pairing.result === '1/2-1/2'}>½-½</ResultButton>
-                        <ResultButton onClick={() => onResultUpdate(pairing.table, '0-1')} selected={pairing.result === '0-1'}>0-1</ResultButton>
+                        <ResultButton onClick={() => pairing.result === '1-0' ? onResultUpdate(pairing.table, null, roundNumber) : onResultUpdate(pairing.table, '1-0', roundNumber)} selected={pairing.result === '1-0'}>1-0</ResultButton>
+                        <ResultButton onClick={() => pairing.result === '1/2-1/2' ? onResultUpdate(pairing.table, null, roundNumber) : onResultUpdate(pairing.table, '1/2-1/2', roundNumber)} selected={pairing.result === '1/2-1/2'}>½-½</ResultButton>
+                        <ResultButton onClick={() => pairing.result === '0-1' ? onResultUpdate(pairing.table, null, roundNumber) : onResultUpdate(pairing.table, '0-1', roundNumber)} selected={pairing.result === '0-1'}>0-1</ResultButton>
                         <button
                           onClick={() => onColorFlip(pairing.table)}
                           className="py-2 px-3 rounded-md text-xs font-semibold bg-orange-600 hover:bg-orange-500 text-white transition-all duration-200"

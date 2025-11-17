@@ -6,6 +6,7 @@ import { useI18n } from '../i18n/I18nContext';
 
 interface LeaderboardProps {
   players: LeaderboardPlayer[];
+  allPlayers: Player[];
   onPrint: () => void;
   isOrganizer: boolean;
   ageGroups: AgeGroup[];
@@ -16,13 +17,40 @@ interface LeaderboardProps {
   onPlayerClick: (player: Player) => void;
 }
 
-const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer, ageGroups, selectedAgeGroupFilter, onAgeGroupFilterChange, selectedWomenFilter, onWomenFilterChange, onPlayerClick }) => {
+const Leaderboard: React.FC<LeaderboardProps> = ({ players, allPlayers, onPrint, isOrganizer, ageGroups, selectedAgeGroupFilter, onAgeGroupFilterChange, selectedWomenFilter, onWomenFilterChange, onPlayerClick }) => {
   const { t } = useI18n();
   
+  // Calculate Buchholz Tie-Break Variable (2023) for each player
+  // Uses ALL tournament players, not just filtered ones
+  const calculateBuchholz = (player: Player): number => {
+    if (player.opponents.length === 0) return 0;
+    
+    // Sum of all opponents' scores from the full tournament player list
+    let buchholzScore = 0;
+    player.opponents.forEach(opponentId => {
+      const opponent = allPlayers.find(p => p.id === opponentId);
+      if (opponent) {
+        buchholzScore += opponent.score;
+      }
+    });
+    
+    return buchholzScore;
+  };
+  
   const sortedPlayers = [...players].sort((a, b) => {
+    // Primary: Score
     if (b.score !== a.score) {
       return b.score - a.score;
     }
+    
+    // Secondary: Buchholz Tie-Break Variable (2023)
+    const buchholzA = calculateBuchholz(a);
+    const buchholzB = calculateBuchholz(b);
+    if (buchholzB !== buchholzA) {
+      return buchholzB - buchholzA;
+    }
+    
+    // Tertiary: ELO Rating
     return b.elo - a.elo;
   });
 
@@ -139,28 +167,35 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ players, onPrint, isOrganizer
               <th className="p-3 font-bold text-yellow-400">{t.player}</th>
               <th className="p-3 text-center font-bold text-yellow-400 hidden md:table-cell">{t.colorHistory}</th>
               <th className="p-3 text-right font-bold text-yellow-400">{t.score}</th>
+              <th className="p-3 text-right font-bold text-yellow-400 hidden lg:table-cell" title="Buchholz Tie-Break">BH</th>
               <th className="p-3 text-right font-bold text-yellow-400">{t.elo}</th>
             </tr>
           </thead>
           <tbody>
-            {sortedPlayers.map((player, index) => (
-              <tr key={player.id} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50">
-                <td className="p-3 font-semibold">{index + 1}</td>
-                <td className="p-3">
-                  <button
-                    onClick={() => onPlayerClick(player)}
-                    className="text-white hover:text-yellow-400 transition duration-300 cursor-pointer text-left"
-                  >
-                    {player.name}
-                  </button>
-                </td>
-                <td className="p-3 text-center font-mono text-xs text-gray-400 hidden md:table-cell">
-                  {player.fullColorHistory.join(' ')}
-                </td>
-                <td className="p-3 text-right font-mono">{player.score.toFixed(1)}</td>
-                <td className="p-3 text-right text-gray-400 font-mono">{player.elo}</td>
-              </tr>
-            ))}
+            {sortedPlayers.map((player, index) => {
+              const buchholz = calculateBuchholz(player);
+              return (
+                <tr key={player.id} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50">
+                  <td className="p-3 font-semibold">{index + 1}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => onPlayerClick(player)}
+                      className="text-white hover:text-yellow-400 transition duration-300 cursor-pointer text-left"
+                    >
+                      {player.name}
+                    </button>
+                  </td>
+                  <td className="p-3 text-center font-mono text-xs text-gray-400 hidden md:table-cell">
+                    {player.fullColorHistory.join(' ')}
+                  </td>
+                  <td className="p-3 text-right font-mono">{player.score.toFixed(1)}</td>
+                  <td className="p-3 text-right text-gray-400 font-mono hidden lg:table-cell" title="Buchholz Tie-Break">
+                    {buchholz.toFixed(1)}
+                  </td>
+                  <td className="p-3 text-right text-gray-400 font-mono">{player.elo}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

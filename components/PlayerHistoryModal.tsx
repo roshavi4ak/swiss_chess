@@ -79,17 +79,19 @@ const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
     return result;
   };
 
-  const getResultColor = (result?: string, isBye: boolean = false) => {
+  const getResultColor = (result?: string, isBye: boolean = false, playerColor?: 'white' | 'black') => {
     if (isBye || result === 'BYE') return 'text-blue-400';
-    switch (result) {
-      case '1-0':
-        return 'text-green-400';
-      case '0-1':
-        return 'text-red-400';
-      case '1/2-1/2':
-        return 'text-yellow-400';
-      default:
-        return 'text-gray-400';
+    if (!result || !playerColor) return 'text-gray-400';
+    
+    // Determine if player won, lost, or tied based on their color and the result
+    if (result === '1/2-1/2') return 'text-blue-400'; // Tie
+    
+    if (playerColor === 'white') {
+      // White player: 1-0 = win (green), 0-1 = loss (red)
+      return result === '1-0' ? 'text-green-400' : 'text-red-400';
+    } else {
+      // Black player: 0-1 = win (green), 1-0 = loss (red)
+      return result === '0-1' ? 'text-green-400' : 'text-red-400';
     }
   };
 
@@ -143,7 +145,7 @@ const PlayerHistoryModal: React.FC<PlayerHistoryModalProps> = ({
                         <div className="text-blue-400 font-medium">{t.matchBye}</div>
                       )}
                     </div>
-                    <div className={`font-bold text-lg ${getResultColor(match.result, match.isBye)}`}>
+                    <div className={`font-bold text-lg ${getResultColor(match.result, match.isBye, match.playerColor)}`}>
                       {formatResult(match.result, match.isBye)}
                     </div>
                   </div>

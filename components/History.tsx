@@ -1,14 +1,31 @@
 import React from 'react';
-import { Pairing } from '../types';
+import { Pairing, Result } from '../types';
 import { useI18n } from '../i18n/I18nContext';
 
 interface HistoryProps {
   pairingsHistory: Pairing[][];
   onClose: () => void;
+  onResultUpdate?: (table: number, result: Result | null, roundNumber: number) => void;
+  isOrganizer?: boolean;
 }
 
-const History: React.FC<HistoryProps> = ({ pairingsHistory, onClose }) => {
+const History: React.FC<HistoryProps> = ({ pairingsHistory, onClose, onResultUpdate, isOrganizer }) => {
   const { t } = useI18n();
+
+  const ResultButton: React.FC<{
+    onClick: () => void;
+    selected: boolean;
+    children: React.ReactNode;
+  }> = ({ onClick, selected, children }) => {
+    const baseClasses = "py-1 px-2 rounded text-xs font-semibold transition-all duration-200";
+    const selectedClasses = "bg-yellow-500 text-gray-900";
+    const unselectedClasses = "bg-gray-600 hover:bg-gray-500 text-white";
+    return (
+      <button onClick={onClick} className={`${baseClasses} ${selected ? selectedClasses : unselectedClasses}`} title={selected ? "Click to clear result" : "Click to select result"}>
+        {children}
+      </button>
+    );
+  };
   
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
@@ -44,9 +61,17 @@ const History: React.FC<HistoryProps> = ({ pairingsHistory, onClose }) => {
                             <span className="font-semibold text-white">{pairing.white.name}</span>
                             <span className="text-gray-400 ml-2 text-sm">({pairing.white.elo})</span>
                           </div>
-                          <div className="font-bold text-yellow-400 mx-4 text-center w-24">
-                            {pairing.result ? (pairing.result === '1/2-1/2' ? '½ - ½' : pairing.result) : <span className="text-sm text-gray-500 font-normal">{t.pending}</span>}
-                          </div>
+                          {isOrganizer && onResultUpdate ? (
+                            <div className="flex justify-center items-center gap-1 mx-4">
+                              <ResultButton onClick={() => pairing.result === '1-0' ? onResultUpdate(pairing.table, null, index + 1) : onResultUpdate(pairing.table, '1-0', index + 1)} selected={pairing.result === '1-0'}>1-0</ResultButton>
+                              <ResultButton onClick={() => pairing.result === '1/2-1/2' ? onResultUpdate(pairing.table, null, index + 1) : onResultUpdate(pairing.table, '1/2-1/2', index + 1)} selected={pairing.result === '1/2-1/2'}>½-½</ResultButton>
+                              <ResultButton onClick={() => pairing.result === '0-1' ? onResultUpdate(pairing.table, null, index + 1) : onResultUpdate(pairing.table, '0-1', index + 1)} selected={pairing.result === '0-1'}>0-1</ResultButton>
+                            </div>
+                          ) : (
+                            <div className="font-bold text-yellow-400 mx-4 text-center w-24">
+                              {pairing.result ? (pairing.result === '1/2-1/2' ? '½ - ½' : pairing.result) : <span className="text-sm text-gray-500 font-normal">{t.pending}</span>}
+                            </div>
+                          )}
                           <div className="flex-1 text-right">
                             <span className="text-gray-400 mr-2 text-sm">({pairing.black.elo})</span>
                             <span className="font-semibold text-white">{pairing.black.name}</span>
